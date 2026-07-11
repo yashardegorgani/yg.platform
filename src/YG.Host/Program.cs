@@ -1,3 +1,4 @@
+using Wolverine;
 using FastEndpoints;
 using YG.BuildingBlocks.Modules;
 
@@ -12,6 +13,14 @@ var modules = ModuleLoader.LoadModules(
 
 foreach (var module in modules)
     module.ConfigureServices(builder.Services, builder.Configuration);
+
+builder.Host.UseWolverine(opts =>
+{
+    opts.UseRuntimeCompilation();   // Host decision: how handler glue gets compiled
+
+    foreach (var module in modules)
+        module.ConfigureWolverine(opts);   // module decisions: what handlers exist
+});
 
 builder.Services.AddFastEndpoints(o =>
     o.Assemblies = modules.Select(m => m.GetType().Assembly).ToArray());

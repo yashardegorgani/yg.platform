@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/src/BuildingBlocks/">
     <Project Path="src/BuildingBlocks/YG.BuildingBlocks.Modules/YG.BuildingBlocks.Modules.csproj" />
+    <Project Path="src/BuildingBlocks/YG.BuildingBlocks.Persistence/YG.BuildingBlocks.Persistence.csproj" Id="c99d2ee7-925e-494c-ab72-8b2ed4f5df58" />
   </Folder>
   <Folder Name="/src/Modules/">
     <Project Path="src/Modules/Catalog/YG.Modules.Catalog/YG.Modules.Catalog.csproj" />

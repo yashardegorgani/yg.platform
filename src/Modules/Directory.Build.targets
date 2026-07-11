@@ -1,13 +1,27 @@
 <Project>
-  <!-- Any project under src/Modules that sets <IsPluginModule>true</IsPluginModule>
-       gets its build output copied to <repo-root>/plugins/<ProjectName>/. -->
-  <Target Name="CopyModuleToPlugins" AfterTargets="Build"
-          Condition="'$(IsPluginModule)' == 'true'">
-    <ItemGroup>
-      <ModuleOutput Include="$(TargetDir)**\*.*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(ModuleOutput)"
-          DestinationFiles="@(ModuleOutput->'$(MSBuildThisFileDirectory)..\..\plugins\$(MSBuildProjectName)\%(RecursiveDir)%(Filename)%(Extension)')"
-          SkipUnchangedFiles="true" />
-  </Target>
+
+	<!-- STEP 4 ADDITION: class libraries do not copy their NuGet dependency DLLs
+       (EF Core, Npgsql, ...) to their output folder by default. Plugin modules
+       must be self-contained, because the Host loads them from the plugins
+       folder and has no references of its own. This flips that default,
+       but only for projects that opted in via IsPluginModule. -->
+	<PropertyGroup Condition="'$(IsPluginModule)' == 'true'">
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
+
+	<!-- STEP 3: any project under src/Modules that sets
+       <IsPluginModule>true</IsPluginModule> gets its build output copied to
+       <repo-root>/plugins/<ProjectName>/ after every successful build.
+       $(MSBuildThisFileDirectory) = the folder containing THIS file (src/Modules/),
+       so ..\..\plugins lands next to YG.slnx. -->
+	<Target Name="CopyModuleToPlugins" AfterTargets="Build"
+			Condition="'$(IsPluginModule)' == 'true'">
+		<ItemGroup>
+			<ModuleOutput Include="$(TargetDir)**\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(ModuleOutput)"
+			  DestinationFiles="@(ModuleOutput->'$(MSBuildThisFileDirectory)..\..\plugins\$(MSBuildProjectName)\%(RecursiveDir)%(Filename)%(Extension)')"
+			  SkipUnchangedFiles="true" />
+	</Target>
+
 </Project>

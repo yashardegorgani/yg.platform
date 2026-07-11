@@ -1,10 +1,12 @@
 ﻿using FastEndpoints;
-using YG.Modules.Catalog.Services;
+using Microsoft.EntityFrameworkCore;
+using YG.Modules.Catalog.Domain;
+using YG.Modules.Catalog.Persistence;
 
 namespace YG.Modules.Catalog.Features.ListProducts;
 
-public sealed class ListProductsEndpoint(IProductCatalog catalog)
-    : EndpointWithoutRequest<IReadOnlyList<ProductDto>>
+public sealed class ListProductsEndpoint(CatalogDbContext db)
+    : EndpointWithoutRequest<List<Product>>
 {
     public override void Configure()
     {
@@ -13,5 +15,6 @@ public sealed class ListProductsEndpoint(IProductCatalog catalog)
     }
 
     public override async Task HandleAsync(CancellationToken ct)
-        => await Send.OkAsync(catalog.All, ct);
+        => await Send.OkAsync(
+            await db.Products.AsNoTracking().OrderByDescending(p => p.CreatedAt).ToListAsync(ct), ct);
 }
