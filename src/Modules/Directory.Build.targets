@@ -1,0 +1,13 @@
+<Project>
+  <!-- Any project under src/Modules that sets <IsPluginModule>true</IsPluginModule>
+       gets its build output copied to <repo-root>/plugins/<ProjectName>/. -->
+  <Target Name="CopyModuleToPlugins" AfterTargets="Build"
+          Condition="'$(IsPluginModule)' == 'true'">
+    <ItemGroup>
+      <ModuleOutput Include="$(TargetDir)**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ModuleOutput)"
+          DestinationFiles="@(ModuleOutput->'$(MSBuildThisFileDirectory)..\..\plugins\$(MSBuildProjectName)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
+  </Target>
+</Project>

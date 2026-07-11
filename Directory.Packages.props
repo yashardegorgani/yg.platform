@@ -1,0 +1,9 @@
+<!-- Directory.Packages.props -->
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="FastEndpoints" Version="8.2.0" />
+  </ItemGroup>
+</Project>

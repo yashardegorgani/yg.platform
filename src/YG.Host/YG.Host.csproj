@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <PackageReference Include="FastEndpoints" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
+    <!-- Build-order only: the assembly is NOT referenced (the plugin loader finds it at runtime). -->
+    <ProjectReference Include="..\Modules\Catalog\YG.Modules.Catalog\YG.Modules.Catalog.csproj"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="modules.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

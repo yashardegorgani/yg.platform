@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPluginModule>true</IsPluginModule>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FastEndpoints" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
+  </ItemGroup>
+
+</Project>

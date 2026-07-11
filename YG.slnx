@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/YG.Host/YG.Host.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/YG.BuildingBlocks.Modules/YG.BuildingBlocks.Modules.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/">
+    <Project Path="src/Modules/Catalog/YG.Modules.Catalog/YG.Modules.Catalog.csproj" />
+  </Folder>
+</Solution>

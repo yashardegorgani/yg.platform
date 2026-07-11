@@ -1,0 +1,23 @@
+# Build output
+bin/
+obj/
+
+# Visual Studio working files
+.vs/
+*.user
+*.suo
+
+# Generated plugin output — rebuilt on every build, never commit
+plugins/*
+!plugins/README.md
+
+# NuGet local caches
+*.nupkg
+packages/
+
+# OS noise
+Thumbs.db
+.DS_Store
+
+# Local-only settings & secrets (uncomment if you add one later)
+# appsettings.Local.json
