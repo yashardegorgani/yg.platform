@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Wolverine;
 using YG.BuildingBlocks.Modules;
 using YG.BuildingBlocks.Persistence;
 using YG.Modules.Catalog.Persistence;
@@ -12,15 +11,10 @@ public sealed class CatalogModule : IYGModule
 {
     public string Name => "Catalog";
 
-    public string Schema => "catalog";
-
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddModuleDbContext<CatalogDbContext>(configuration, Schema);
+        services.AddModuleDbContext<CatalogDbContext>(configuration, CatalogDbContext.SchemaName);
     }
-
-    public void ConfigureWolverine(WolverineOptions options)
-        => options.Discovery.IncludeAssembly(GetType().Assembly);
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
     {

@@ -21,7 +21,9 @@ public static class PersistenceServiceCollectionExtensions
                 npgsql.MigrationsHistoryTable("__ef_migrations", schema);
                 // Allows plain POCOs (like ProductAttributes) to map to jsonb columns.
                 npgsql.ConfigureDataSource(ds => ds.EnableDynamicJson());
-            }));
+            }),
+            optionsLifetime: ServiceLifetime.Singleton);
+
 
         if (configuration.GetValue("Database:AutoProvision", defaultValue: true))
             services.AddHostedService<EnsureDatabaseHostedService<TContext>>();

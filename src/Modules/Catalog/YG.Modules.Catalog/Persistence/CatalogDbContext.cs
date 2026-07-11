@@ -7,7 +7,9 @@ namespace YG.Modules.Catalog.Persistence;
 public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
     : ModuleDbContext(options)
 {
-    public override string Schema => "catalog";
+    public const string SchemaName = "catalog";
+    public override string Schema => SchemaName;
+    
 
     public DbSet<Product> Products => Set<Product>();
 

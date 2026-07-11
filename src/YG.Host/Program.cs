@@ -16,10 +16,9 @@ foreach (var module in modules)
 
 builder.Host.UseWolverine(opts =>
 {
-    opts.UseRuntimeCompilation();   // Host decision: how handler glue gets compiled
-
+    opts.UseRuntimeCompilation();
     foreach (var module in modules)
-        module.ConfigureWolverine(opts);   // module decisions: what handlers exist
+        opts.Discovery.IncludeAssembly(module.GetType().Assembly);
 });
 
 builder.Services.AddFastEndpoints(o =>

@@ -1,7 +1,7 @@
 ﻿using FastEndpoints;
 using FluentValidation;
+using Wolverine;
 using YG.Modules.Catalog.Domain;
-using YG.Modules.Catalog.Persistence;
 
 namespace YG.Modules.Catalog.Features.CreateProduct;
 
@@ -17,7 +17,7 @@ public sealed class CreateProductValidator : Validator<CreateProductRequest>
     }
 }
 
-public sealed class CreateProductEndpoint(CatalogDbContext db)
+public sealed class CreateProductEndpoint(IMessageBus bus)
     : Endpoint<CreateProductRequest, CreateProductResponse>
 {
     public override void Configure()
@@ -28,9 +28,8 @@ public sealed class CreateProductEndpoint(CatalogDbContext db)
 
     public override async Task HandleAsync(CreateProductRequest req, CancellationToken ct)
     {
-        var product = new Product { Name = req.Name, Price = req.Price, Attributes = req.Attributes ?? new() };
-        db.Products.Add(product);
-        await db.SaveChangesAsync(ct);
-        await Send.OkAsync(new CreateProductResponse(product.Id), ct);
+        var id = await bus.InvokeAsync<Guid>(
+            new CreateProduct(req.Name, req.Price, req.Attributes), ct);
+        await Send.OkAsync(new CreateProductResponse(id), ct);
     }
 }
