@@ -13,7 +13,7 @@ public sealed class CatalogModule : IYGModule
 
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddModuleDbContext<CatalogDbContext>(configuration, CatalogDbContext.SchemaName);
+        services.AddModuleDbContext<CatalogDbContext>(configuration);
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)

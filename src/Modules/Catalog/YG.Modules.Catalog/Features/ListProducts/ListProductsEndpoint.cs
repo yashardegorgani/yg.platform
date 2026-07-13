@@ -11,7 +11,7 @@ public sealed class ListProductsEndpoint(CatalogDbContext db)
     public override void Configure()
     {
         Get("/catalog/products");
-        AllowAnonymous();
+        //AllowAnonymous();
     }
 
     public override async Task HandleAsync(CancellationToken ct)

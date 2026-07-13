@@ -7,10 +7,8 @@ namespace YG.BuildingBlocks.Persistence;
 public static class PersistenceServiceCollectionExtensions
 {
     public static IServiceCollection AddModuleDbContext<TContext>(
-        this IServiceCollection services,
-        IConfiguration configuration,
-        string schema)
-        where TContext : ModuleDbContext
+        this IServiceCollection services, IConfiguration configuration)
+        where TContext : ModuleDbContext, ISchemaOwner
     {
         var connectionString = configuration.GetConnectionString("Default")
             ?? throw new InvalidOperationException("ConnectionStrings:Default is missing.");
@@ -18,15 +16,16 @@ public static class PersistenceServiceCollectionExtensions
         services.AddDbContext<TContext>(options =>
             options.UseNpgsql(connectionString, npgsql =>
             {
-                npgsql.MigrationsHistoryTable("__ef_migrations", schema);
+                npgsql.MigrationsHistoryTable("__ef_migrations", TContext.SchemaName);
                 // Allows plain POCOs (like ProductAttributes) to map to jsonb columns.
                 npgsql.ConfigureDataSource(ds => ds.EnableDynamicJson());
             }),
             optionsLifetime: ServiceLifetime.Singleton);
 
-
-        if (configuration.GetValue("Database:AutoProvision", defaultValue: true))
-            services.AddHostedService<EnsureDatabaseHostedService<TContext>>();
+        if (configuration.GetValue("Database:AutoMigrate", true))
+        {
+            services.AddHostedService<MigrateDatabaseHostedService<TContext>>();
+        }
 
         return services;
     }

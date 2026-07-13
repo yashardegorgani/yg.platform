@@ -5,25 +5,26 @@ using YG.Modules.Catalog.Domain;
 namespace YG.Modules.Catalog.Persistence;
 
 public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
-    : ModuleDbContext(options)
+    : ModuleDbContext(options), ISchemaOwner
 {
-    public const string SchemaName = "catalog";
+    public static string SchemaName => "catalog";
     public override string Schema => SchemaName;
-    
 
     public DbSet<Product> Products => Set<Product>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);   // applies HasDefaultSchema("catalog")
+        base.OnModelCreating(modelBuilder);   // applies HasDefaultSchema(Schema)
 
-        modelBuilder.Entity<Product>(product =>
+        modelBuilder.Entity<Product>(b =>
         {
-            product.ToTable("products");
-            product.Property(x => x.Name).HasMaxLength(200);
-            product.Property(x => x.Price).HasPrecision(18, 2);
-            product.Property(x => x.Attributes).HasColumnType("jsonb");
-            product.HasIndex(x => x.Attributes).HasMethod("gin");  // indexed json queries
+            b.ToTable("products");
+            b.HasKey(p => p.Id);
+            b.Property(p => p.Name).HasMaxLength(200);
+
+            // Flexible attributes as jsonb, searchable via GIN.
+            b.Property(p => p.Attributes).HasColumnType("jsonb");
+            b.HasIndex(p => p.Attributes).HasMethod("gin");
         });
     }
 }

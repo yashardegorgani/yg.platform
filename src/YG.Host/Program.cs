@@ -1,5 +1,6 @@
-using Wolverine;
 using FastEndpoints;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Wolverine;
 using YG.BuildingBlocks.Modules;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,10 +22,25 @@ builder.Host.UseWolverine(opts =>
         opts.Discovery.IncludeAssembly(module.GetType().Assembly);
 });
 
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["Auth:Authority"];
+        options.RequireHttpsMetadata = false;          // dev only: Keycloak is on http
+        options.TokenValidationParameters.ValidateAudience = false; // revisit in step 7
+        options.MapInboundClaims = false;
+    });
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddFastEndpoints(o =>
     o.Assemblies = modules.Select(m => m.GetType().Assembly).ToArray());
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseFastEndpoints(c => c.Endpoints.RoutePrefix = "api");
 

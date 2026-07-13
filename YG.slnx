@@ -8,5 +8,7 @@
   </Folder>
   <Folder Name="/src/Modules/">
     <Project Path="src/Modules/Catalog/YG.Modules.Catalog/YG.Modules.Catalog.csproj" />
+    <Project Path="src/Modules/Identity/YG.Modules.Identity.Contracts/YG.Modules.Identity.Contracts.csproj" Id="7d0d1b8a-de80-4f05-bda6-2271529526cb" />
+    <Project Path="src/Modules/Identity/YG.Modules.Identity/YG.Modules.Identity.csproj" Id="4ff14fd4-8bcd-410a-a8ca-0c97436fea1e" />
   </Folder>
 </Solution>
