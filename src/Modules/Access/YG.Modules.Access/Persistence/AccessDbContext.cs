@@ -1,0 +1,41 @@
+﻿using Microsoft.EntityFrameworkCore;
+using YG.BuildingBlocks.Persistence;
+using YG.Modules.Access.Domain;
+
+namespace YG.Modules.Access.Persistence;
+
+public sealed class AccessDbContext(DbContextOptions<AccessDbContext> options)
+    : ModuleDbContext(options), ISchemaOwner
+{
+    public static string SchemaName => "access";
+    public override string Schema => SchemaName;
+
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<UserRole> UserRoles => Set<UserRole>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Role>(b =>
+        {
+            b.ToTable("roles");
+            b.HasKey(r => r.Id);
+            b.Property(r => r.Name).HasMaxLength(100);
+            b.HasIndex(r => r.Name).IsUnique();
+            b.HasData(new Role
+            {
+                Id = Role.MemberRoleId,
+                Name = "member",
+                Description = "Default role granted to every registered user",
+            });
+        });
+
+        modelBuilder.Entity<UserRole>(b =>
+        {
+            b.ToTable("user_roles");
+            b.HasKey(u => new { u.Sub, u.RoleId });              // composite: idempotent grants for free
+            b.Property(u => u.Sub).HasMaxLength(64);
+        });
+    }
+}

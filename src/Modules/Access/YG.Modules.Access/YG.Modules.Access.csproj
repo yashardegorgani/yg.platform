@@ -2,19 +2,15 @@
 	<PropertyGroup>
 		<IsPluginModule>true</IsPluginModule>
 	</PropertyGroup>
-	
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
-	
 	<ItemGroup>
-	  <PackageReference Include="FastEndpoints" />
 	  <PackageReference Include="WolverineFx" />
 	</ItemGroup>
 	<ItemGroup>
-		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Auth\YG.BuildingBlocks.Auth.csproj" />
 		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
 		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Persistence\YG.BuildingBlocks.Persistence.csproj" />
-		<ProjectReference Include="..\YG.Modules.Identity.Contracts\YG.Modules.Identity.Contracts.csproj" />
+		<ProjectReference Include="..\..\Identity\YG.Modules.Identity.Contracts\YG.Modules.Identity.Contracts.csproj" />
 	</ItemGroup>
 </Project>

@@ -3,10 +3,12 @@
     <Project Path="src/YG.Host/YG.Host.csproj" />
   </Folder>
   <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/YG.BuildingBlocks.Auth/YG.BuildingBlocks.Auth.csproj" Id="06c5a993-6603-472a-9baf-e167fecfd808" />
     <Project Path="src/BuildingBlocks/YG.BuildingBlocks.Modules/YG.BuildingBlocks.Modules.csproj" />
     <Project Path="src/BuildingBlocks/YG.BuildingBlocks.Persistence/YG.BuildingBlocks.Persistence.csproj" Id="c99d2ee7-925e-494c-ab72-8b2ed4f5df58" />
   </Folder>
   <Folder Name="/src/Modules/">
+    <Project Path="src/Modules/Access/YG.Modules.Access/YG.Modules.Access.csproj" Id="6044e25e-8557-4995-a68c-bd4aae336eab" />
     <Project Path="src/Modules/Catalog/YG.Modules.Catalog/YG.Modules.Catalog.csproj" />
     <Project Path="src/Modules/Identity/YG.Modules.Identity.Contracts/YG.Modules.Identity.Contracts.csproj" Id="7d0d1b8a-de80-4f05-bda6-2271529526cb" />
     <Project Path="src/Modules/Identity/YG.Modules.Identity/YG.Modules.Identity.csproj" Id="4ff14fd4-8bcd-410a-a8ca-0c97436fea1e" />

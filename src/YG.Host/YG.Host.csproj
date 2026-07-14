@@ -8,13 +8,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\BuildingBlocks\YG.BuildingBlocks.Auth\YG.BuildingBlocks.Auth.csproj" />
 		<ProjectReference Include="..\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Modules\**\YG.Modules.*.csproj"
-						  Exclude="..\Modules\**\*.Contracts.csproj"
-						  ReferenceOutputAssembly="false" />
+		<ProjectReference Include="..\Modules\**\YG.Modules.*.csproj" Exclude="..\Modules\**\*.Contracts.csproj" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 	<ItemGroup>
