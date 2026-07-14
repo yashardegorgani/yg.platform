@@ -1,4 +1,5 @@
 using FastEndpoints;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Wolverine;
 using YG.BuildingBlocks.Auth;
@@ -35,7 +36,7 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
-
+builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformer>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IUserContextAccessor, HttpUserContextAccessor>();
 builder.Services.AddScoped<IUserContext>(sp =>

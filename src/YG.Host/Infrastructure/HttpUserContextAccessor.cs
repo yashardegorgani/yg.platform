@@ -17,13 +17,16 @@ internal sealed class HttpUserContextAccessor(IHttpContextAccessor httpContextAc
             return new UserContext(
                 IsAuthenticated: true,
                 Sub: principal.FindFirstValue("sub"),
-                Username: principal.FindFirstValue("preferred_username"));
+                Username: principal.FindFirstValue("preferred_username"),
+                Roles: principal.FindAll("role").Select(c => c.Value).ToHashSet());
         }
     }
 
-    private sealed record UserContext(bool IsAuthenticated, string? Sub, string? Username)
+    private sealed record UserContext(
+        bool IsAuthenticated, string? Sub, string? Username, IReadOnlySet<string> Roles)
         : IUserContext
     {
-        public static readonly UserContext Anonymous = new(false, null, null);
+        public static readonly UserContext Anonymous = new(false, null, null, new HashSet<string>());
+        public bool HasRole(string role) => Roles.Contains(role);
     }
 }

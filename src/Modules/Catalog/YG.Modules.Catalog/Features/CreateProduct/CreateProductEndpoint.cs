@@ -23,7 +23,7 @@ public sealed class CreateProductEndpoint(IMessageBus bus)
     public override void Configure()
     {
         Post("/catalog/products");
-        AllowAnonymous(); // step 7 replaces this with Permissions(...)
+        Roles("member");
     }
 
     public override async Task HandleAsync(CreateProductRequest req, CancellationToken ct)

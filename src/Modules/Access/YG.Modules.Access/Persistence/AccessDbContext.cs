@@ -23,12 +23,9 @@ public sealed class AccessDbContext(DbContextOptions<AccessDbContext> options)
             b.HasKey(r => r.Id);
             b.Property(r => r.Name).HasMaxLength(100);
             b.HasIndex(r => r.Name).IsUnique();
-            b.HasData(new Role
-            {
-                Id = Role.MemberRoleId,
-                Name = "member",
-                Description = "Default role granted to every registered user",
-            });
+            b.HasData(
+                new Role { Id = Role.MemberRoleId, Name = "member", Description = "Default role granted to every registered user" },
+                new Role { Id = Role.AdminRoleId, Name = "admin", Description = "Access administration" });
         });
 
         modelBuilder.Entity<UserRole>(b =>
