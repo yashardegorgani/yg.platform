@@ -1,4 +1,5 @@
 ﻿using Wolverine;
+using YG.Modules.Catalog.Contracts;
 using YG.Modules.Catalog.Domain;
 using YG.Modules.Catalog.Persistence;
 

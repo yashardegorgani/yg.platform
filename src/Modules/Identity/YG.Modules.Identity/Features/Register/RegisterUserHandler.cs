@@ -1,12 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Wolverine;
 using YG.Modules.Identity.Contracts;
 using YG.Modules.Identity.Domain;
 using YG.Modules.Identity.Persistence;
 
-namespace YG.Modules.Identity.Features.Me;
-
-public sealed record RegisterUser(string Sub, string Username);
+namespace YG.Modules.Identity.Features.Register;
 
 public static class RegisterUserHandler
 {
@@ -14,7 +13,7 @@ public static class RegisterUserHandler
         RegisterUser command, IdentityDbContext db, IMessageBus bus, CancellationToken ct)
     {
         var exists = await db.Users.AnyAsync(u => u.Sub == command.Sub, ct);
-        if (exists) 
+        if (exists)
             return false;                  // idempotent: seen before, nothing to announce
 
         db.Users.Add(new User
@@ -23,10 +22,21 @@ public static class RegisterUserHandler
             Username = command.Username,
             FirstSeenAt = DateTimeOffset.UtcNow,
         });
-        await db.SaveChangesAsync(ct);
+
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException ex) when (
+            ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            // Lost a race with a concurrent first sighting. Same outcome as the
+            // AnyAsync short-circuit above: the user exists, nothing to announce.
+            return false;
+        }
 
         await bus.PublishAsync(new UserRegistered(command.Sub, command.Username));
-        
-        return true;                               // first sighting — announced to the world
+
+        return true;                       // first sighting - announced to the world
     }
 }

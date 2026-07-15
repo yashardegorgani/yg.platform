@@ -1,13 +1,15 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using YG.Modules.Access.Persistence;
 
+namespace YG.Modules.Access.Features.Grants;
+
 public sealed class ListUserRolesEndpoint(AccessDbContext db) : EndpointWithoutRequest<List<string>>
 {
-    public override void Configure() 
-    { 
-        Get("/access/users/{sub}/roles"); 
-        Roles("admin"); 
+    public override void Configure()
+    {
+        Get("/access/users/{sub}/roles");
+        Permissions("access.grants.manage");
     }
 
     public override async Task HandleAsync(CancellationToken ct)

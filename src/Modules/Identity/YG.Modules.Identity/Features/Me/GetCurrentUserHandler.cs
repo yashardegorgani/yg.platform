@@ -1,10 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using YG.Modules.Identity.Domain;
 using YG.Modules.Identity.Persistence;
 
 namespace YG.Modules.Identity.Features.Me;
-
-public sealed record GetCurrentUser(string Sub);
 
 public static class GetCurrentUserHandler
 {

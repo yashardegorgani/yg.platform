@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using YG.Modules.Catalog.Contracts;
 
 namespace YG.Modules.Catalog.Features.CreateProduct;
 

@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Wolverine;
 using YG.BuildingBlocks.Auth;
 using YG.Modules.Identity.Domain;
@@ -26,6 +26,6 @@ public sealed class MeEndpoint(IMessageBus bus, IUserContext user)
             return; 
         }
 
-        await Send.OkAsync(new MeResponse(found.Sub, found.Username, found.FirstSeenAt));
+        await Send.OkAsync(new MeResponse(found.Sub, found.Username, found.FirstSeenAt), ct);
     }
 }

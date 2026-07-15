@@ -7,12 +7,12 @@
   <ItemGroup>
     <PackageReference Include="FastEndpoints" />
     <PackageReference Include="WolverineFx" />
-    <PackageReference Include="WolverineFx.RuntimeCompilation" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Persistence\YG.BuildingBlocks.Persistence.csproj" />
+    <ProjectReference Include="..\YG.Modules.Catalog.Contracts\YG.Modules.Catalog.Contracts.csproj" />
   </ItemGroup>
 
 </Project>

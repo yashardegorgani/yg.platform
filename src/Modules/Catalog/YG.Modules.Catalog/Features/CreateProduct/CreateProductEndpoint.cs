@@ -23,7 +23,7 @@ public sealed class CreateProductEndpoint(IMessageBus bus)
     public override void Configure()
     {
         Post("/catalog/products");
-        Roles("member");
+        Permissions("catalog.products.create");
     }
 
     public override async Task HandleAsync(CreateProductRequest req, CancellationToken ct)

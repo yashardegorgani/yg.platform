@@ -7,7 +7,6 @@ namespace YG.BuildingBlocks.Modules;
 /// <summary>
 /// The contract every module fulfills. This interface is the ONLY thing
 /// the Host will ultimately know about any module.
-/// (It will grow: Schema in step 4, ConfigureWolverine in step 5.)
 /// </summary>
 public interface IYGModule
 {

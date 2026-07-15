@@ -11,7 +11,7 @@ public sealed class ListProductsEndpoint(CatalogDbContext db)
     public override void Configure()
     {
         Get("/catalog/products");
-        Roles("member");
+        Permissions("catalog.products.list");
     }
 
     public override async Task HandleAsync(CancellationToken ct)

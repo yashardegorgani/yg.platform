@@ -1,7 +1,9 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using YG.Modules.Access.Domain;
 using YG.Modules.Access.Persistence;
+
+namespace YG.Modules.Access.Features.Grants;
 
 public sealed record GrantRoleRequest(string RoleName);
 
@@ -10,7 +12,7 @@ public sealed class GrantRoleEndpoint(AccessDbContext db) : Endpoint<GrantRoleRe
     public override void Configure()
     {
         Post("/access/users/{sub}/roles");
-        Roles("admin");
+        Permissions("access.grants.manage");
     }
 
     public override async Task HandleAsync(GrantRoleRequest req, CancellationToken ct)

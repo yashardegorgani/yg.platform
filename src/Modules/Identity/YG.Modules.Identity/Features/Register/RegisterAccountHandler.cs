@@ -1,5 +1,4 @@
 ﻿using Wolverine;
-using YG.Modules.Identity.Features.Me;
 using YG.Modules.Identity.Infrastructure;
 
 namespace YG.Modules.Identity.Features.Register;

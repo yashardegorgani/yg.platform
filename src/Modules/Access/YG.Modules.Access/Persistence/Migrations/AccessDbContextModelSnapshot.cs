@@ -59,6 +59,62 @@ namespace YG.Modules.Access.Persistence.Migrations
                         });
                 });
 
+            modelBuilder.Entity("YG.Modules.Access.Domain.RolePermission", b =>
+                {
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Permission")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("RoleId", "Permission");
+
+                    b.ToTable("role_permissions", "access");
+
+                    b.HasData(
+                        new
+                        {
+                            RoleId = new Guid("6c9e0f5a-2b71-4b8e-9f3d-1a2b3c4d5e6f"),
+                            Permission = "catalog.products.list"
+                        },
+                        new
+                        {
+                            RoleId = new Guid("6c9e0f5a-2b71-4b8e-9f3d-1a2b3c4d5e6f"),
+                            Permission = "catalog.products.create"
+                        },
+                        new
+                        {
+                            RoleId = new Guid("6c9e0f5a-2b71-4b8e-9f3d-1a2b3c4d5e6f"),
+                            Permission = "inventory.stock.read"
+                        },
+                        new
+                        {
+                            RoleId = new Guid("6c9e0f5a-2b71-4b8e-9f3d-1a2b3c4d5e6f"),
+                            Permission = "purchase.orders.place"
+                        },
+                        new
+                        {
+                            RoleId = new Guid("6c9e0f5a-2b71-4b8e-9f3d-1a2b3c4d5e6f"),
+                            Permission = "purchase.orders.list"
+                        },
+                        new
+                        {
+                            RoleId = new Guid("a1b2c3d4-0000-4000-8000-000000000001"),
+                            Permission = "inventory.stock.set"
+                        },
+                        new
+                        {
+                            RoleId = new Guid("a1b2c3d4-0000-4000-8000-000000000001"),
+                            Permission = "access.roles.manage"
+                        },
+                        new
+                        {
+                            RoleId = new Guid("a1b2c3d4-0000-4000-8000-000000000001"),
+                            Permission = "access.grants.manage"
+                        });
+                });
+
             modelBuilder.Entity("YG.Modules.Access.Domain.UserRole", b =>
                 {
                     b.Property<string>("Sub")

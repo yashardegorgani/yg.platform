@@ -12,6 +12,7 @@ public sealed class AccessDbContext(DbContextOptions<AccessDbContext> options)
 
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -33,6 +34,26 @@ public sealed class AccessDbContext(DbContextOptions<AccessDbContext> options)
             b.ToTable("user_roles");
             b.HasKey(u => new { u.Sub, u.RoleId });              // composite: idempotent grants for free
             b.Property(u => u.Sub).HasMaxLength(64);
+        });
+
+        modelBuilder.Entity<RolePermission>(b =>
+        {
+            b.ToTable("role_permissions");
+            b.HasKey(p => new { p.RoleId, p.Permission });   // composite PK: idempotent grants, third time
+            b.Property(p => p.Permission).HasMaxLength(200);
+
+            b.HasData(
+                // member: everyday capabilities
+                new RolePermission { RoleId = Role.MemberRoleId, Permission = "catalog.products.list" },
+                new RolePermission { RoleId = Role.MemberRoleId, Permission = "catalog.products.create" },
+                new RolePermission { RoleId = Role.MemberRoleId, Permission = "inventory.stock.read" },
+                new RolePermission { RoleId = Role.MemberRoleId, Permission = "purchase.orders.place" },
+                new RolePermission { RoleId = Role.MemberRoleId, Permission = "purchase.orders.list" },
+
+                // admin: stewardship
+                new RolePermission { RoleId = Role.AdminRoleId, Permission = "inventory.stock.set" },
+                new RolePermission { RoleId = Role.AdminRoleId, Permission = "access.roles.manage" },
+                new RolePermission { RoleId = Role.AdminRoleId, Permission = "access.grants.manage" });
         });
     }
 }

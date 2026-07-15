@@ -9,8 +9,12 @@
   </Folder>
   <Folder Name="/src/Modules/">
     <Project Path="src/Modules/Access/YG.Modules.Access/YG.Modules.Access.csproj" Id="6044e25e-8557-4995-a68c-bd4aae336eab" />
+    <Project Path="src/Modules/Catalog/YG.Modules.Catalog.Contracts/YG.Modules.Catalog.Contracts.csproj" Id="aafb38f6-6bf2-4104-bb9f-f5d1d6067b2c" />
     <Project Path="src/Modules/Catalog/YG.Modules.Catalog/YG.Modules.Catalog.csproj" />
     <Project Path="src/Modules/Identity/YG.Modules.Identity.Contracts/YG.Modules.Identity.Contracts.csproj" Id="7d0d1b8a-de80-4f05-bda6-2271529526cb" />
     <Project Path="src/Modules/Identity/YG.Modules.Identity/YG.Modules.Identity.csproj" Id="4ff14fd4-8bcd-410a-a8ca-0c97436fea1e" />
+    <Project Path="src/Modules/Inventory/YG.Modules.Inventory.Contracts/YG.Modules.Inventory.Contracts.csproj" />
+    <Project Path="src/Modules/Inventory/YG.Modules.Inventory/YG.Modules.Inventory.csproj" />
+    <Project Path="src/Modules/Purchase/YG.Modules.Purchase/YG.Modules.Purchase.csproj" />
   </Folder>
 </Solution>

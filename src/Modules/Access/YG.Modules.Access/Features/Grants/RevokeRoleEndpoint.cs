@@ -1,13 +1,15 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using YG.Modules.Access.Persistence;
 
+namespace YG.Modules.Access.Features.Grants;
+
 public sealed class RevokeRoleEndpoint(AccessDbContext db) : EndpointWithoutRequest
 {
-    public override void Configure() 
-    { 
-        Delete("/access/users/{sub}/roles/{roleName}"); 
-        Roles("admin"); 
+    public override void Configure()
+    {
+        Delete("/access/users/{sub}/roles/{roleName}");
+        Permissions("access.grants.manage");
     }
 
     public override async Task HandleAsync(CancellationToken ct)

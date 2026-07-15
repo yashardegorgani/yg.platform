@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Wolverine;
 
 namespace YG.Modules.Identity.Features.Register;
@@ -18,6 +18,6 @@ public sealed class RegisterEndpoint(IMessageBus bus) : Endpoint<RegisterRequest
     {
         var result = await bus.InvokeAsync<RegisterAccountResult>(
             new RegisterAccount(req.Username, req.Email, req.Password), ct);
-        await Send.OkAsync(new RegisterResponse(result.Sub, result.Username, result.IsNew));
+        await Send.OkAsync(new RegisterResponse(result.Sub, result.Username, result.IsNew), ct);
     }
 }

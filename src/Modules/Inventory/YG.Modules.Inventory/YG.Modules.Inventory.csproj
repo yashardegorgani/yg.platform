@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<IsPluginModule>true</IsPluginModule>
+	</PropertyGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="FastEndpoints" />
+		<PackageReference Include="WolverineFx" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
+		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Persistence\YG.BuildingBlocks.Persistence.csproj" />
+		<ProjectReference Include="..\..\Catalog\YG.Modules.Catalog.Contracts\YG.Modules.Catalog.Contracts.csproj" />
+		<ProjectReference Include="..\YG.Modules.Inventory.Contracts\YG.Modules.Inventory.Contracts.csproj" />
+	</ItemGroup>
+</Project>
