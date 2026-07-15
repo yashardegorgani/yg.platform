@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <!-- Not a plugin: this project must NOT set IsPluginModule. -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Modules use ASP.NET Core types (FastEndpoints), so the test host needs the shared framework too. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="NetArchTest.Rules" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio">
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Everything under test. Referencing a module here is legal: tests sit OUTSIDE the architecture. -->
+    <ProjectReference Include="..\..\src\BuildingBlocks\YG.BuildingBlocks.Auth\YG.BuildingBlocks.Auth.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\YG.BuildingBlocks.Persistence\YG.BuildingBlocks.Persistence.csproj" />
+
+    <ProjectReference Include="..\..\src\Modules\Catalog\YG.Modules.Catalog\YG.Modules.Catalog.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Catalog\YG.Modules.Catalog.Contracts\YG.Modules.Catalog.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\YG.Modules.Identity\YG.Modules.Identity.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\YG.Modules.Identity.Contracts\YG.Modules.Identity.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Access\YG.Modules.Access\YG.Modules.Access.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Inventory\YG.Modules.Inventory\YG.Modules.Inventory.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Inventory\YG.Modules.Inventory.Contracts\YG.Modules.Inventory.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Purchase\YG.Modules.Purchase\YG.Modules.Purchase.csproj" />
+  </ItemGroup>
+
+</Project>

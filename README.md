@@ -23,7 +23,7 @@ The requirements I set at the start:
 | Module communication without coupling | Wolverine in-process messaging through tiny `*.Contracts` projects |
 | PostgreSQL + JSONB, multi-schema | Every module owns exactly one schema; flexible attributes live in `jsonb` |
 | Configurable, context-based RBAC | Permission-based: endpoints declare capabilities; role→permission mapping is runtime data with an admin API |
-| Concern & boundary separation | Vertical-slice features, contracts-only cross-module references |
+| Concern & boundary separation | Vertical-slice features, contracts-only references — enforced by 10 architecture tests |
 
 ## The system at a glance
 
@@ -129,6 +129,21 @@ No `Controllers/`, `Services/`, `Repositories/` layers. Each feature folder hold
 message, handler, and endpoint as separate files: `PlaceOrder.cs`,
 `PlaceOrderHandler.cs`, `PlaceOrderEndpoint.cs`. Cohesion over categorization.
 
+### 6. The boundaries are executable
+
+Every rule above is enforced by `tests/YG.ArchitectureTests` — NetArchTest for
+dependency rules, source scans for the conventions reflection can't see:
+
+- modules touch other modules **only through Contracts** (internals are off-limits)
+- Contracts assemblies reference nothing but the runtime
+- no module type touches `HttpContext` or `System.Security.Claims`
+- nothing references the Host; building blocks know no modules
+- endpoints and handlers live in `Features`, DbContexts in `Persistence`
+- feature code declares `Permissions("...")`, never `Roles("...")`, and every
+  permission matches `module.resource.action`
+
+Reaching into another module's internals doesn't fail code review — it fails the build.
+
 ## A request, end to end
 
 `POST /api/purchase/orders { productId, quantity }` with a member token:
@@ -161,6 +176,8 @@ src/
     ├── Inventory/   (+ .Contracts)   # stock, ProductCreated subscriber, reservations
     └── Purchase/                     # orders with snapshot-at-boundary
 plugins/                              # build output the Host actually loads
+tests/
+└── YG.ArchitectureTests/             # 10 executable boundary rules (NetArchTest + source scans)
 ```
 
 ## Running it locally
@@ -222,15 +239,13 @@ boundary as data, not as an exception.
 | Purchase snapshots product data | Copy name + price at purchase | History must not rewrite itself when Catalog changes |
 | Stock reservation | Single conditional `UPDATE` | Correct under concurrency without locks or retries |
 | Layer folders (`Handlers/`, `Commands/`) | **Rejected** | Kills feature cohesion; vertical slices + one concern per file |
+| Boundary enforcement | Architecture tests, not discipline | A rule that can be broken silently is a suggestion; these fail the build |
 | `Update-Database` in dev | **Never** | Startup auto-migration is the single write path to the schema |
 
 ## Honest limitations & roadmap
 
 - **In-memory bus**: events die with the process, and reserve-then-save in Purchase is
   not atomic across schemas. Next step: Wolverine's EF Core **durable outbox**.
-- **Architecture tests**: NetArchTest rules (contracts-only references, no
-  `HttpContext` inside modules, no module→Host references) to make the boundaries
-  fail the build instead of the code review.
 - **Secrets hygiene**: move the Keycloak admin secret and DB password to environment
   variables / user secrets.
 - Per-request role/permission caching, admin-token caching for the Keycloak client.
