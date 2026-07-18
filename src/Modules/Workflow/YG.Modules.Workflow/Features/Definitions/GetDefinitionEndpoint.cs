@@ -22,6 +22,7 @@ public sealed class GetDefinitionEndpoint(WorkflowDbContext db)
     public override async Task HandleAsync(GetDefinitionRequest req, CancellationToken ct)
     {
         var d = await db.Definitions.FirstOrDefaultAsync(x => x.Id == req.Id, ct);
+        
         if (d is null)
         {
             await Send.NotFoundAsync(ct);
