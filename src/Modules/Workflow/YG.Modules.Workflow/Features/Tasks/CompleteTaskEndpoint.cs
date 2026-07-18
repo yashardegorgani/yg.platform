@@ -87,7 +87,7 @@ public sealed class CompleteTaskEndpoint(WorkflowDbContext db, IUserContext user
         });
 
         // 5. Advance: next step's task, or the finish line.
-        var next = WorkflowEngine.NextStep(definition.Document, task.StepId);
+        var next = WorkflowEngine.NextStep(definition.Document, task.StepId, newContext);
         if (next is not null)
         {
             WorkflowEngine.ActivateStep(db, instance, definition.Key, next);

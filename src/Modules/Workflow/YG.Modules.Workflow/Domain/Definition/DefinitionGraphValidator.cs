@@ -2,6 +2,8 @@
 
 public static class DefinitionGraphValidator
 {
+    private static readonly HashSet<string> KnownOps = ["eq", "ne", "gt", "lt", "gte", "lte"];
+
     /// <summary>Structural integrity — the FK-substitute we owe the document design.</summary>
     public static List<string> Validate(DefinitionDocument doc)
     {
@@ -29,12 +31,62 @@ public static class DefinitionGraphValidator
         else if (!stepIds.Contains(doc.StartStepId))
             errors.Add($"startStepId '{doc.StartStepId}' is not a known step.");
 
+        // Referential integrity: transitions may only connect steps that exist.
         foreach (var t in doc.Transitions)
         {
             if (!stepIds.Contains(t.From))
                 errors.Add($"Transition references unknown step '{t.From}'.");
             if (!stepIds.Contains(t.To))
                 errors.Add($"Transition references unknown step '{t.To}'.");
+        }
+
+        // --- Routing rules (slice 3) ---
+
+        // Conditions must be well-formed. The runtime treats nonsense as "false";
+        // publish treats nonsense as a design error. Both are correct.
+        foreach (var t in doc.Transitions.Where(t => t.Condition is not null))
+        {
+            var c = t.Condition!;
+            if (string.IsNullOrWhiteSpace(c.Field))
+                errors.Add($"Transition {t.From} -> {t.To}: condition needs a field path.");
+            if (!KnownOps.Contains(c.Op))
+                errors.Add($"Transition {t.From} -> {t.To}: unknown operator '{c.Op}'. Known: eq, ne, gt, lt, gte, lte.");
+            if (c.Value is null)
+                errors.Add($"Transition {t.From} -> {t.To}: condition needs a value to compare against.");
+        }
+
+        // Branching sanity per step: document order is semantics, unconditional = else.
+        foreach (var group in doc.Transitions.GroupBy(t => t.From))
+        {
+            var outgoing = group.ToList();
+            var elseIndex = outgoing.FindIndex(t => t.Condition is null);
+
+            // Dead rules: anything after the unconditional transition can never fire.
+            if (elseIndex >= 0 && elseIndex < outgoing.Count - 1)
+                errors.Add($"Step '{group.Key}': transitions after the unconditional one can never fire. Put the unconditional transition last.");
+
+            // Mandatory else: conditional branching without a fallback can stall an instance.
+            if (elseIndex < 0 && outgoing.Any(t => t.Condition is not null))
+                errors.Add($"Step '{group.Key}': conditional branching needs an unconditional fallback transition.");
+        }
+
+        // Reachability: every step must be reachable from the start step.
+        // (Skipped if the start step is invalid — that error is already reported above.)
+        if (doc.StartStepId is not null && stepIds.Contains(doc.StartStepId))
+        {
+            var reachable = new HashSet<string> { doc.StartStepId };
+            var frontier = new Queue<string>();
+            frontier.Enqueue(doc.StartStepId);
+
+            while (frontier.Count > 0)
+            {
+                var current = frontier.Dequeue();
+                foreach (var t in doc.Transitions.Where(t => t.From == current && stepIds.Contains(t.To)))
+                    if (reachable.Add(t.To)) frontier.Enqueue(t.To);
+            }
+
+            foreach (var s in doc.Steps.Where(s => !reachable.Contains(s.Id)))
+                errors.Add($"Step '{s.Id}' is unreachable from the start step.");
         }
 
         return errors;

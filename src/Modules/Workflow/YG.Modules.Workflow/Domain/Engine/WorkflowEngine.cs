@@ -22,12 +22,6 @@ internal static class WorkflowEngine
         foreach (var s in doc.Steps.Where(s => s.Kind == StepKind.Human && string.IsNullOrWhiteSpace(s.Role)))
             errors.Add($"Step '{s.Id}': human steps need a role for task assignment.");
 
-        foreach (var t in doc.Transitions.Where(t => t.Condition is not null))
-            errors.Add($"Transition {t.From} -> {t.To}: conditions arrive in slice 3.");
-
-        foreach (var g in doc.Transitions.GroupBy(t => t.From).Where(g => g.Count() > 1))
-            errors.Add($"Step '{g.Key}' has multiple outgoing transitions: branching arrives in slice 3.");
-
         return errors;
     }
 
@@ -66,13 +60,20 @@ internal static class WorkflowEngine
     }
 
     /// <summary>
-    /// Slice-2 routing: at most one unconditional transition per step.
-    /// Null means the instance is done. Slice 3 replaces the first line
-    /// with the condition evaluator — nothing else will move.
+    /// Transition selection: outgoing transitions are evaluated in DOCUMENT ORDER;
+    /// the first satisfied one wins. An unconditional transition always matches —
+    /// place it last as the "else" branch. Null means no outgoing transitions:
+    /// the instance is done. ("No match" can't happen for published definitions —
+    /// the validator requires an unconditional fallback wherever conditions branch.)
     /// </summary>
-    public static StepDefinition? NextStep(DefinitionDocument doc, string fromStepId)
+    public static StepDefinition? NextStep(DefinitionDocument doc, string fromStepId,
+        Dictionary<string, JsonElement> context)
     {
-        var transition = doc.Transitions.FirstOrDefault(t => t.From == fromStepId);
+        var transition = doc.Transitions
+            .Where(t => t.From == fromStepId)
+            .FirstOrDefault(t => t.Condition is null
+                              || ConditionEvaluator.Evaluate(t.Condition, context));
+
         return transition is null ? null : doc.Steps.First(s => s.Id == transition.To);
     }
 }
