@@ -1,4 +1,5 @@
 ﻿using Wolverine;
+using YG.BuildingBlocks.Messaging;
 using YG.Modules.Catalog.Contracts;
 using YG.Modules.Catalog.Domain;
 using YG.Modules.Catalog.Persistence;
@@ -9,7 +10,7 @@ public static class CreateProductHandler
 {
     // Convention: public "Handle", 1st param = message, rest injected from DI.
     public static async Task<Guid> Handle(
-        CreateProduct command, CatalogDbContext db, IMessageBus bus, CancellationToken ct)
+        CreateProduct command, CatalogDbContext db, IYGMessageBus bus, CancellationToken ct)
     {
         var product = new Product
         {

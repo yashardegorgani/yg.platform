@@ -1,13 +1,14 @@
 using FastEndpoints;
 using Wolverine;
 using YG.BuildingBlocks.Auth;
+using YG.BuildingBlocks.Messaging;
 using YG.Modules.Identity.Domain;
 
 namespace YG.Modules.Identity.Features.Me;
 
 public sealed record MeResponse(string Sub, string Username, DateTimeOffset FirstSeenAt);
 
-public sealed class MeEndpoint(IMessageBus bus, IUserContext user)
+public sealed class MeEndpoint(IYGMessageBus bus, IUserContext user)
     : EndpointWithoutRequest<MeResponse>
 {
     public override void Configure()

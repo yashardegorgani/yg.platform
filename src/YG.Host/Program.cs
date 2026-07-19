@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Wolverine;
 using YG.BuildingBlocks.Auth;
 using YG.BuildingBlocks.Modules;
+using YG.BuildingBlocks.Messaging;
 using YG.Host.Infrastructure;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,7 @@ builder.Host.UseWolverine(opts =>
     foreach (var module in modules)
         opts.Discovery.IncludeAssembly(module.GetType().Assembly);
 });
+builder.Services.AddYGMessaging();
 
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

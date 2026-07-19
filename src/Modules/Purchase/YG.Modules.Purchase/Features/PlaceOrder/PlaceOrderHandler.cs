@@ -1,4 +1,5 @@
 using Wolverine;
+using YG.BuildingBlocks.Messaging;
 using YG.Modules.Catalog.Contracts;
 using YG.Modules.Inventory.Contracts;
 using YG.Modules.Purchase.Domain;
@@ -9,7 +10,7 @@ namespace YG.Modules.Purchase.Features.PlaceOrder;
 public static class PlaceOrderHandler
 {
     public static async Task<PlaceOrderResult> Handle(
-        PlaceOrder command, PurchaseDbContext db, IMessageBus bus, CancellationToken ct)
+        PlaceOrder command, PurchaseDbContext db, IYGMessageBus bus, CancellationToken ct)
     {
         // 1. Ask Catalog what this product is (name + price for the snapshot).
         //    Request/response across the boundary - Purchase never touches catalog.products.

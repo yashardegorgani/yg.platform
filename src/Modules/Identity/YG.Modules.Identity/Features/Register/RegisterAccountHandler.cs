@@ -1,4 +1,5 @@
 ﻿using Wolverine;
+using YG.BuildingBlocks.Messaging;
 using YG.Modules.Identity.Infrastructure;
 
 namespace YG.Modules.Identity.Features.Register;
@@ -9,7 +10,7 @@ public sealed record RegisterAccountResult(string Sub, string Username, bool IsN
 public static class RegisterAccountHandler
 {
     public static async Task<RegisterAccountResult> Handle(
-        RegisterAccount command, IUserDirectory directory, IMessageBus bus, CancellationToken ct)
+        RegisterAccount command, IUserDirectory directory, IYGMessageBus bus, CancellationToken ct)
     {
         var sub = await directory.EnsureUserAsync(
             command.Username, command.Email, command.Password, ct);

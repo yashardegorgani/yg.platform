@@ -22,6 +22,8 @@ public static class TestAssemblies
         ("Catalog.Contracts", typeof(Modules.Catalog.Contracts.ProductCreated).Assembly),
         ("Identity.Contracts", typeof(Modules.Identity.Contracts.UserRegistered).Assembly),
         ("Inventory.Contracts", typeof(Modules.Inventory.Contracts.ReserveStock).Assembly),
+        ("Access.Contracts", typeof(Modules.Access.Contracts.UserRoleGranted).Assembly),
+        ("Access.Contracts", typeof(Modules.Access.Contracts.UserRoleRevoked).Assembly),
     ];
 
     public static readonly (string Name, Assembly Assembly)[] BuildingBlocks =

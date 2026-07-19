@@ -1,12 +1,13 @@
 using FastEndpoints;
 using Wolverine;
+using YG.BuildingBlocks.Messaging;
 
 namespace YG.Modules.Identity.Features.Register;
 
 public sealed record RegisterRequest(string Username, string Email, string Password);
 public sealed record RegisterResponse(string Sub, string Username, bool IsNew);
 
-public sealed class RegisterEndpoint(IMessageBus bus) : Endpoint<RegisterRequest, RegisterResponse>
+public sealed class RegisterEndpoint(IYGMessageBus bus) : Endpoint<RegisterRequest, RegisterResponse>
 {
     public override void Configure()
     {

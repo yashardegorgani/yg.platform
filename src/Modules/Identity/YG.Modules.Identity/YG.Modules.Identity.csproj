@@ -13,6 +13,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Auth\YG.BuildingBlocks.Auth.csproj" />
+		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Messaging\YG.BuildingBlocks.Messaging.csproj" />
 		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
 		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Persistence\YG.BuildingBlocks.Persistence.csproj" />
 		<ProjectReference Include="..\YG.Modules.Identity.Contracts\YG.Modules.Identity.Contracts.csproj" />

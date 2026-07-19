@@ -24,8 +24,10 @@
   <ItemGroup>
     <!-- Everything under test. Referencing a module here is legal: tests sit OUTSIDE the architecture. -->
     <ProjectReference Include="..\..\src\BuildingBlocks\YG.BuildingBlocks.Auth\YG.BuildingBlocks.Auth.csproj" />
+    <ProjectReference Include="..\..\src\BuildingBlocks\YG.BuildingBlocks.Messaging\YG.BuildingBlocks.Messaging.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
     <ProjectReference Include="..\..\src\BuildingBlocks\YG.BuildingBlocks.Persistence\YG.BuildingBlocks.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Access\YG.Modules.Access.Contracts\YG.Modules.Access.Contracts.csproj" />
 
     <ProjectReference Include="..\..\src\Modules\Catalog\YG.Modules.Catalog\YG.Modules.Catalog.csproj" />
     <ProjectReference Include="..\..\src\Modules\Catalog\YG.Modules.Catalog.Contracts\YG.Modules.Catalog.Contracts.csproj" />

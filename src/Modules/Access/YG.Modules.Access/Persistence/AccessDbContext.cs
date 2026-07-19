@@ -34,6 +34,11 @@ public sealed class AccessDbContext(DbContextOptions<AccessDbContext> options)
             b.ToTable("user_roles");
             b.HasKey(u => new { u.Sub, u.RoleId });              // composite: idempotent grants for free
             b.Property(u => u.Sub).HasMaxLength(64);
+            b.Property(u => u.GrantedBy).HasMaxLength(64);
+
+            // Assignments must point at a real role. No navigation property —
+            // same nav-less FK pattern as workflow history.
+            b.HasOne<Role>().WithMany().HasForeignKey(u => u.RoleId);
         });
 
         modelBuilder.Entity<RolePermission>(b =>

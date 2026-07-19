@@ -1,6 +1,7 @@
 ﻿using FastEndpoints;
 using FluentValidation;
 using Wolverine;
+using YG.BuildingBlocks.Messaging;
 using YG.Modules.Catalog.Domain;
 
 namespace YG.Modules.Catalog.Features.CreateProduct;
@@ -17,7 +18,7 @@ public sealed class CreateProductValidator : Validator<CreateProductRequest>
     }
 }
 
-public sealed class CreateProductEndpoint(IMessageBus bus)
+public sealed class CreateProductEndpoint(IYGMessageBus bus)
     : Endpoint<CreateProductRequest, CreateProductResponse>
 {
     public override void Configure()

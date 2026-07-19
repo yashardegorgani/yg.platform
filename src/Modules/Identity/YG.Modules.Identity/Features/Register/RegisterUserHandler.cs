@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Wolverine;
+using YG.BuildingBlocks.Messaging;
 using YG.Modules.Identity.Contracts;
 using YG.Modules.Identity.Domain;
 using YG.Modules.Identity.Persistence;
@@ -10,7 +11,7 @@ namespace YG.Modules.Identity.Features.Register;
 public static class RegisterUserHandler
 {
     public static async Task<bool> Handle(
-        RegisterUser command, IdentityDbContext db, IMessageBus bus, CancellationToken ct)
+        RegisterUser command, IdentityDbContext db, IYGMessageBus bus, CancellationToken ct)
     {
         var exists = await db.Users.AnyAsync(u => u.Sub == command.Sub, ct);
         if (exists)

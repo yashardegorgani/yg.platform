@@ -2,6 +2,7 @@ using FastEndpoints;
 using FluentValidation;
 using Wolverine;
 using YG.BuildingBlocks.Auth;
+using YG.BuildingBlocks.Messaging;
 
 namespace YG.Modules.Purchase.Features.PlaceOrder;
 
@@ -17,7 +18,7 @@ public sealed class PlaceOrderValidator : Validator<PlaceOrderRequest>
     }
 }
 
-public sealed class PlaceOrderEndpoint(IMessageBus bus, IUserContext user)
+public sealed class PlaceOrderEndpoint(IYGMessageBus bus, IUserContext user)
     : Endpoint<PlaceOrderRequest, PlaceOrderResponse>
 {
     public override void Configure()
