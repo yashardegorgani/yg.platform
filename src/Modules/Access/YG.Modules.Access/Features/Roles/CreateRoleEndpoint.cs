@@ -1,5 +1,6 @@
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
+using YG.BuildingBlocks.Messaging;
 using YG.Modules.Access.Domain;
 using YG.Modules.Access.Persistence;
 
@@ -7,7 +8,7 @@ namespace YG.Modules.Access.Features.Roles;
 
 public sealed record CreateRoleRequest(string Name, string? Description);
 
-public sealed class CreateRoleEndpoint(AccessDbContext db) : Endpoint<CreateRoleRequest, RoleResponse>
+public sealed class CreateRoleEndpoint(AccessDbContext db, IYGOutbox outbox) : Endpoint<CreateRoleRequest, RoleResponse>
 {
     public override void Configure()
     {
@@ -24,7 +25,13 @@ public sealed class CreateRoleEndpoint(AccessDbContext db) : Endpoint<CreateRole
             return;
         }
 
-        var role = new Role { Id = Guid.NewGuid(), Name = req.Name, Description = req.Description };
+        var role = new Role
+        {
+            Id = Guid.NewGuid(),
+            Name = req.Name,
+            Description = req.Description
+        };
+
         db.Roles.Add(role);
         await db.SaveChangesAsync(ct);
 

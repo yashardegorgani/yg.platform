@@ -2,7 +2,7 @@
 
 namespace YG.BuildingBlocks.Messaging;
 
-internal sealed class WolverineMessageBus(IMessageBus inner) : IYGMessageBus
+public sealed class WolverineMessageBus(IMessageBus inner) : IYGMessageBus
 {
     public ValueTask PublishAsync<TMessage>(TMessage message)
         => inner.PublishAsync(message);

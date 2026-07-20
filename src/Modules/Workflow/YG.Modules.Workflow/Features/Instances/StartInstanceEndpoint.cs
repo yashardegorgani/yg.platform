@@ -3,9 +3,10 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using YG.BuildingBlocks.Auth;
+using YG.BuildingBlocks.Messaging;
 using YG.Modules.Workflow.Domain;
-using YG.Modules.Workflow.Domain.Engine;
 using YG.Modules.Workflow.Domain.Runtime;
+using YG.Modules.Workflow.Engine;
 using YG.Modules.Workflow.Persistence;
 
 namespace YG.Modules.Workflow.Features.Instances;
@@ -22,7 +23,7 @@ public sealed class StartInstanceValidator : Validator<StartInstanceRequest>
     }
 }
 
-public sealed class StartInstanceEndpoint(WorkflowDbContext db, IUserContext user)
+public sealed class StartInstanceEndpoint(WorkflowDbContext db, IUserContext user, ActivityRegistry registry, IYGOutbox outbox)
     : Endpoint<StartInstanceRequest, StartInstanceResponse>
 {
     public override void Configure()
@@ -46,7 +47,7 @@ public sealed class StartInstanceEndpoint(WorkflowDbContext db, IUserContext use
         }
 
         // The capability guard: published but not yet runnable by THIS engine -> honest 409.
-        var errors = WorkflowEngine.CheckExecutable(definition.Document);
+        var errors = WorkflowEngine.CheckExecutable(definition.Document, registry);
         if (errors.Count > 0)
         {
             foreach (var error in errors) 
@@ -79,10 +80,14 @@ public sealed class StartInstanceEndpoint(WorkflowDbContext db, IUserContext use
                 businessKey = req.BusinessKey,
             }),
         });
+        
+        outbox.Enroll(db);
 
-        WorkflowEngine.ActivateStep(db, instance, definition.Key, startStep);
+        var workOrder = WorkflowEngine.ActivateStep(db, instance, definition.Key, startStep);
+        if (workOrder is not null)
+            await outbox.PublishAsync(workOrder);
 
-        await db.SaveChangesAsync(ct);   // instance + history + step + task: one atomic unit
+        await outbox.SaveChangesAndPublishAsync(ct);   // instance + history + step (+ work order): one atomic unit
 
         await Send.OkAsync(new(instance.Id, startStep.Id), ct);
     }

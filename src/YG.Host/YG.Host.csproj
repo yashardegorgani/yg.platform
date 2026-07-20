@@ -4,6 +4,8 @@
 		<PackageReference Include="FastEndpoints" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
 		<PackageReference Include="WolverineFx" />
+		<PackageReference Include="WolverineFx.EntityFrameworkCore" />
+		<PackageReference Include="WolverineFx.Postgresql" />
 		<PackageReference Include="WolverineFx.RuntimeCompilation" />
 	</ItemGroup>
 

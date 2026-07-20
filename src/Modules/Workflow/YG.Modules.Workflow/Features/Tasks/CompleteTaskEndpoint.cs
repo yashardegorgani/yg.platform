@@ -2,8 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using YG.BuildingBlocks.Auth;
-using YG.Modules.Workflow.Domain.Engine;
+using YG.BuildingBlocks.Messaging;
 using YG.Modules.Workflow.Domain.Runtime;
+using YG.Modules.Workflow.Engine;
 using YG.Modules.Workflow.Persistence;
 
 namespace YG.Modules.Workflow.Features.Tasks;
@@ -11,7 +12,7 @@ namespace YG.Modules.Workflow.Features.Tasks;
 public sealed record CompleteTaskRequest(Guid Id, Dictionary<string, JsonElement>? Data);
 public sealed record CompleteTaskResponse(string InstanceStatus, string? NextStepId);
 
-public sealed class CompleteTaskEndpoint(WorkflowDbContext db, IUserContext user)
+public sealed class CompleteTaskEndpoint(WorkflowDbContext db, IUserContext user, IYGOutbox outbox)
     : Endpoint<CompleteTaskRequest, CompleteTaskResponse>
 {
     public override void Configure()
@@ -87,23 +88,14 @@ public sealed class CompleteTaskEndpoint(WorkflowDbContext db, IUserContext user
         });
 
         // 5. Advance: next step's task, or the finish line.
-        var next = WorkflowEngine.NextStep(definition.Document, task.StepId, newContext);
-        if (next is not null)
-        {
-            WorkflowEngine.ActivateStep(db, instance, definition.Key, next);
-        }
-        else
-        {
-            instance.Status = WorkflowInstanceStatus.Completed;
-            instance.CompletedAt = now;
-            db.History.Add(new WorkflowHistoryEntry
-            {
-                InstanceId = instance.Id,
-                Action = "instance-completed",
-            });
-        }
+        // 5. Advance: next human task, next automatic work order, or the finish line.
+        var (next, workOrder) = WorkflowEngine.Advance(db, instance, definition, task.StepId, newContext, now);
 
-        await db.SaveChangesAsync(ct);   // evidence + closure + advance: one atomic unit
+        outbox.Enroll(db);
+        if (workOrder is not null)
+            await outbox.PublishAsync(workOrder);
+
+        await outbox.SaveChangesAndPublishAsync(ct);   // evidence + closure + advance: one atomic unit
 
         await Send.OkAsync(new(instance.Status.ToString(), next?.Id), ct);
     }

@@ -4,6 +4,7 @@
 
   <ItemGroup>
     <PackageReference Include="WolverineFx" />
+    <PackageReference Include="WolverineFx.EntityFrameworkCore" />
   </ItemGroup>
 
 </Project>

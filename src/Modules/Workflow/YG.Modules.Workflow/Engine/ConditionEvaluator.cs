@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using YG.Modules.Workflow.Domain.Definition;
 
-namespace YG.Modules.Workflow.Domain.Engine;
+namespace YG.Modules.Workflow.Engine;
 
 /// <summary>
 /// Answers one question: is this condition satisfied by the instance context?

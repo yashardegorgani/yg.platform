@@ -1,6 +1,5 @@
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Wolverine;
 using YG.BuildingBlocks.Auth;
 using YG.BuildingBlocks.Messaging;
 using YG.Modules.Access.Contracts;
@@ -8,7 +7,7 @@ using YG.Modules.Access.Persistence;
 
 namespace YG.Modules.Access.Features.Grants;
 
-public sealed class RevokeRoleEndpoint(AccessDbContext db, IUserContext user, IYGMessageBus bus)
+public sealed class RevokeRoleEndpoint(AccessDbContext db, IUserContext user, IYGOutbox outbox)
     : EndpointWithoutRequest
 {
     public override void Configure()
@@ -29,12 +28,20 @@ public sealed class RevokeRoleEndpoint(AccessDbContext db, IUserContext user, IY
             return;
         }
 
-        var deleted = await db.UserRoles
-            .Where(u => u.Sub == sub && db.Roles.Any(r => r.Id == u.RoleId && r.Name == roleName))
-            .ExecuteDeleteAsync(ct);
+        var userRole = await db.UserRoles
+            .SingleOrDefaultAsync(u => u.Sub == sub
+                && db.Roles.Any(r => r.Id == u.RoleId && r.Name == roleName), ct);
 
-        if (deleted > 0)
-            await bus.PublishAsync(new UserRoleRevoked(sub, roleName));
+        if (userRole is null)
+        {
+            await Send.NoContentAsync(ct);   // nothing revoked: same outcome, NO event
+            return;
+        }
+
+        outbox.Enroll(db);
+        db.UserRoles.Remove(userRole);
+        await outbox.PublishAsync(new UserRoleRevoked(sub, roleName));
+        await outbox.SaveChangesAndPublishAsync(ct);
 
         await Send.NoContentAsync(ct);
     }

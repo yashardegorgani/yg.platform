@@ -18,6 +18,7 @@
     <Project Path="src/Modules/Inventory/YG.Modules.Inventory.Contracts/YG.Modules.Inventory.Contracts.csproj" />
     <Project Path="src/Modules/Inventory/YG.Modules.Inventory/YG.Modules.Inventory.csproj" />
     <Project Path="src/Modules/Purchase/YG.Modules.Purchase/YG.Modules.Purchase.csproj" />
+    <Project Path="src/Modules/Workflow/YG.Modules.Workflow.Contracts/YG.Modules.Workflow.Contracts.csproj" Id="860a05c6-b192-4ca4-b1f2-979e5a61fb3d" />
     <Project Path="src/Modules/Workflow/YG.Modules.Workflow/YG.Modules.Workflow.csproj" Id="cbfb99e8-f63e-48bf-8e92-40e86e296433" />
   </Folder>
   <Folder Name="/tests/">

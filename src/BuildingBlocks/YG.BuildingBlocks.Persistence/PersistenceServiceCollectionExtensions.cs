@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Wolverine.EntityFrameworkCore;
 
 namespace YG.BuildingBlocks.Persistence;
 
@@ -13,14 +14,14 @@ public static class PersistenceServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("Default")
             ?? throw new InvalidOperationException("ConnectionStrings:Default is missing.");
 
-        services.AddDbContext<TContext>(options =>
+        services.AddDbContextWithWolverineIntegration<TContext>(options =>
             options.UseNpgsql(connectionString, npgsql =>
             {
                 npgsql.MigrationsHistoryTable("__ef_migrations", TContext.SchemaName);
                 // Allows plain POCOs (like ProductAttributes) to map to jsonb columns.
                 npgsql.ConfigureDataSource(ds => ds.EnableDynamicJson());
             }),
-            optionsLifetime: ServiceLifetime.Singleton);
+            "messaging");   // where the envelope tables live — must match Program.cs
 
         if (configuration.GetValue("Database:AutoMigrate", true))
         {

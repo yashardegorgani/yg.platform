@@ -1,6 +1,5 @@
 using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
-using Wolverine;
 using YG.BuildingBlocks.Auth;
 using YG.BuildingBlocks.Messaging;
 using YG.Modules.Access.Contracts;
@@ -11,7 +10,7 @@ namespace YG.Modules.Access.Features.Grants;
 
 public sealed record GrantRoleRequest(string RoleName);
 
-public sealed class GrantRoleEndpoint(AccessDbContext db, IUserContext user, IYGMessageBus bus)
+public sealed class GrantRoleEndpoint(AccessDbContext db, IUserContext user, IYGOutbox outbox)
     : Endpoint<GrantRoleRequest>
 {
     public override void Configure()
@@ -36,6 +35,8 @@ public sealed class GrantRoleEndpoint(AccessDbContext db, IUserContext user, IYG
             return;
         }
 
+        outbox.Enroll(db);
+
         db.UserRoles.Add(new UserRole
         {
             Sub = sub,
@@ -43,9 +44,8 @@ public sealed class GrantRoleEndpoint(AccessDbContext db, IUserContext user, IYG
             GrantedBy = user.Sub,
             GrantedAt = DateTimeOffset.UtcNow,
         });
-        await db.SaveChangesAsync(ct);
-
-        await bus.PublishAsync(new UserRoleGranted(sub, role.Name));
+        await outbox.PublishAsync(new UserRoleGranted(sub, role.Name));
+        await outbox.SaveChangesAndPublishAsync(ct);
 
         await Send.NoContentAsync(ct);
     }
