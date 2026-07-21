@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using YG.Modules.Workflow.Persistence;
@@ -11,7 +11,7 @@ public sealed record StepInstanceView(string StepId, string Status,
     Dictionary<string, JsonElement>? CapturedData, string? CompletedBy, DateTimeOffset? CompletedAt);
 
 public sealed record HistoryView(string Action, string? StepId, string? Actor,
-    JsonElement? Data, DateTimeOffset OccurredAt);
+    JsonElement? ActorSnapshot, JsonElement? Data, DateTimeOffset OccurredAt);
 
 public sealed record InstanceDetail(Guid Id, string DefinitionKey, int DefinitionVersion,
     string Status, string? BusinessKey, Dictionary<string, JsonElement> Context,
@@ -46,7 +46,7 @@ public sealed class GetInstanceEndpoint(WorkflowDbContext db)
         var history = await db.History
             .Where(h => h.InstanceId == req.Id)
             .OrderBy(h => h.OccurredAt)
-            .Select(h => new HistoryView(h.Action, h.StepId, h.Actor, h.Data, h.OccurredAt))
+            .Select(h => new HistoryView(h.Action, h.StepId, h.Actor, h.ActorSnapshot, h.Data, h.OccurredAt))
             .ToListAsync(ct);
 
         await Send.OkAsync(new(instance.Id, instance.DefinitionKey, instance.DefinitionVersion,

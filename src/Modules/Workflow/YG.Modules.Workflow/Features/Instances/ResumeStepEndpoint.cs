@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using YG.BuildingBlocks.Auth;
 using YG.BuildingBlocks.Messaging;
@@ -73,6 +73,7 @@ public sealed class ResumeStepEndpoint(WorkflowDbContext db, IUserContext user, 
             StepId = stepInstance.StepId,
             Action = "activity-resumed",
             Actor = user.Sub,
+            ActorSnapshot = WorkflowHistoryEntry.SnapshotOf(user.Sub, user.Username, user.Roles),
         });
 
         // Endpoint turf -> outbox rails: the wake-up and the work order commit together.

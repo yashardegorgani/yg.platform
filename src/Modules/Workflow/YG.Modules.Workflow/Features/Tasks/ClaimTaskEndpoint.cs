@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using YG.BuildingBlocks.Auth;
 using YG.Modules.Workflow.Domain.Runtime;
@@ -62,6 +62,7 @@ public sealed class ClaimTaskEndpoint(WorkflowDbContext db, IUserContext user)
             StepId = task.StepId,
             Action = "task-claimed",
             Actor = user.Sub,
+            ActorSnapshot = WorkflowHistoryEntry.SnapshotOf(user.Sub, user.Username, user.Roles),
         });
         await db.SaveChangesAsync(ct);
 

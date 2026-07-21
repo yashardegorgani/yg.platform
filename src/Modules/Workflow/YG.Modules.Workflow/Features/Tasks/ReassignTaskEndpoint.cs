@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using YG.BuildingBlocks.Auth;
@@ -73,6 +73,7 @@ public sealed class ReassignTaskEndpoint(WorkflowDbContext db, IUserContext user
             StepId = task.StepId,
             Action = "task-reassigned",
             Actor = user.Sub,
+            ActorSnapshot = WorkflowHistoryEntry.SnapshotOf(user.Sub, user.Username, user.Roles),
             Data = JsonSerializer.SerializeToElement(new { toSub = req.ToSub, toRole = req.ToRole }),
         });
         await db.SaveChangesAsync(ct);

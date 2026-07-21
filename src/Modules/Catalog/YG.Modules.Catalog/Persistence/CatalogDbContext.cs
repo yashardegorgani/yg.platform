@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using YG.BuildingBlocks.Persistence;
 using YG.Modules.Catalog.Domain;
 
@@ -23,7 +23,8 @@ public sealed class CatalogDbContext(DbContextOptions<CatalogDbContext> options)
             b.Property(p => p.Name).HasMaxLength(200);
 
             // Flexible attributes as jsonb, searchable via GIN.
-            b.Property(p => p.Attributes).HasColumnType("jsonb");
+            b.Property(p => p.Attributes).HasColumnType("jsonb")
+                .HasComment("Free-form product attributes: {key: value}, varies per product. Searchable via the GIN index.");
             b.HasIndex(p => p.Attributes).HasMethod("gin");
         });
     }

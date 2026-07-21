@@ -12,4 +12,9 @@ public sealed class WorkflowHistoryEntry
     public string? Actor { get; set; }              // sub; null when the engine itself acts
     public JsonElement? Data { get; set; }          // snapshot of what happened
     public DateTimeOffset OccurredAt { get; set; } = DateTimeOffset.UtcNow;
+
+    public JsonElement? ActorSnapshot { get; set; }  // {sub, username, roles} frozen at write time; null = engine
+
+    public static JsonElement SnapshotOf(string? sub, string? username, IEnumerable<string> roles)
+        => JsonSerializer.SerializeToElement(new { sub, username, roles = roles.OrderBy(r => r).ToArray() });
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using YG.BuildingBlocks.Persistence;
 using YG.Modules.Workflow.Domain;
 using YG.Modules.Workflow.Domain.Runtime;
@@ -37,7 +37,7 @@ public sealed class WorkflowDbContext(DbContextOptions<WorkflowDbContext> option
             // Typed DefinitionDocument POCO -> one jsonb column.
             // Works because AddModuleDbContext enables dynamic JSON (same as Catalog's ProductAttributes).
             b.Property(d => d.Document).HasColumnType("jsonb")
-                .HasComment("The definition graph: steps, transitions, activities, form references.");
+                .HasComment("The definition graph: {startStepId, steps: [{id, kind: Human|Automatic, role?, formRef?, activity?: {ref, input}, onFailure?: {maxRetries, onExhausted: Pend|Continue}}], transitions: [{from, to, condition?: {field, op, value}}]}");
 
             b.Property(d => d.CreatedBy).HasMaxLength(100);
             b.Property(d => d.PublishedBy).HasMaxLength(100);
@@ -58,7 +58,7 @@ public sealed class WorkflowDbContext(DbContextOptions<WorkflowDbContext> option
             b.Property(i => i.BusinessKey).HasMaxLength(200)
                 .HasComment("Opaque reference to a business entity in some module. Never a FK.");
             b.Property(i => i.Context).HasColumnType("jsonb")
-                .HasComment("Accumulated state, keyed by step id. Steps write it; transitions only read it.");
+                .HasComment("Accumulated state keyed by step id: {stepId: {field: value}}. Field shapes vary per definition. Steps write it; transitions only read it.");
             b.Property(i => i.StartedBy).HasMaxLength(100);
             b.HasIndex(i => i.Status);
             b.HasIndex(i => i.BusinessKey);
@@ -72,7 +72,8 @@ public sealed class WorkflowDbContext(DbContextOptions<WorkflowDbContext> option
             b.Property(s => s.StepId).HasMaxLength(100)
                 .HasComment("Step id inside the pinned definition document.");
             b.Property(s => s.Status).HasConversion<string>().HasMaxLength(30);
-            b.Property(s => s.CapturedData).HasColumnType("jsonb");
+            b.Property(s => s.CapturedData).HasColumnType("jsonb")
+                .HasComment("Form data captured at step completion: {field: value}, shape defined by the step's formRef. Frozen once written.");
             b.Property(s => s.CompletedBy).HasMaxLength(100);
             b.HasOne(s => s.Instance).WithMany().HasForeignKey(s => s.InstanceId);
             b.HasIndex(s => s.InstanceId);
@@ -106,7 +107,10 @@ public sealed class WorkflowDbContext(DbContextOptions<WorkflowDbContext> option
             b.Property(h => h.Action).HasMaxLength(50)
                 .HasComment("instance-started | task-created | task-claimed | task-completed | instance-completed");
             b.Property(h => h.Actor).HasMaxLength(100);
-            b.Property(h => h.Data).HasColumnType("jsonb");
+            b.Property(h => h.Data).HasColumnType("jsonb")
+                .HasComment("Action payload, shape per action: task-reassigned {toSub?, toRole?} | task-completed {data} | activity-failed/pended {error, attempts} | note-added {text}.");
+            b.Property(h => h.ActorSnapshot).HasColumnType("jsonb")
+                .HasComment("Actor identity frozen at write time: {sub, username, roles: [string]}. Null = the engine acted.");
             b.HasOne<WorkflowInstance>().WithMany().HasForeignKey(h => h.InstanceId);   // constraint, no nav — it's a log
             b.HasIndex(h => h.InstanceId);
         });

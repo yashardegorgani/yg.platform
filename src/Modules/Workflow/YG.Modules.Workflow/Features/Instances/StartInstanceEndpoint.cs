@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
@@ -74,6 +74,7 @@ public sealed class StartInstanceEndpoint(WorkflowDbContext db, IUserContext use
             InstanceId = instance.Id,
             Action = "instance-started",
             Actor = user.Sub,
+            ActorSnapshot = WorkflowHistoryEntry.SnapshotOf(user.Sub, user.Username, user.Roles),
             Data = JsonSerializer.SerializeToElement(new
             {
                 definitionVersion = definition.Version,

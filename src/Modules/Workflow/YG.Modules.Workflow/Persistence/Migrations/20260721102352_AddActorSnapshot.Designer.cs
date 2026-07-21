@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using YG.Modules.Workflow.Domain.Definition;
@@ -14,9 +15,11 @@ using YG.Modules.Workflow.Persistence;
 namespace YG.Modules.Workflow.Persistence.Migrations
 {
     [DbContext(typeof(WorkflowDbContext))]
-    partial class WorkflowDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260721102352_AddActorSnapshot")]
+    partial class AddActorSnapshot
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,12 +46,10 @@ namespace YG.Modules.Workflow.Persistence.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<JsonElement?>("ActorSnapshot")
-                        .HasColumnType("jsonb")
-                        .HasComment("Actor identity frozen at write time: {sub, username, roles: [string]}. Null = the engine acted.");
+                        .HasColumnType("jsonb");
 
                     b.Property<JsonElement?>("Data")
-                        .HasColumnType("jsonb")
-                        .HasComment("Action payload, shape per action: task-reassigned {toSub?, toRole?} | task-completed {data} | activity-failed/pended {error, attempts} | note-added {text}.");
+                        .HasColumnType("jsonb");
 
                     b.Property<Guid>("InstanceId")
                         .HasColumnType("uuid");
@@ -87,7 +88,7 @@ namespace YG.Modules.Workflow.Persistence.Migrations
                     b.Property<Dictionary<string, JsonElement>>("Context")
                         .IsRequired()
                         .HasColumnType("jsonb")
-                        .HasComment("Accumulated state keyed by step id: {stepId: {field: value}}. Field shapes vary per definition. Steps write it; transitions only read it.");
+                        .HasComment("Accumulated state, keyed by step id. Steps write it; transitions only read it.");
 
                     b.Property<string>("DefinitionKey")
                         .IsRequired()
@@ -136,8 +137,7 @@ namespace YG.Modules.Workflow.Persistence.Migrations
                         .HasColumnType("integer");
 
                     b.Property<Dictionary<string, JsonElement>>("CapturedData")
-                        .HasColumnType("jsonb")
-                        .HasComment("Form data captured at step completion: {field: value}, shape defined by the step's formRef. Frozen once written.");
+                        .HasColumnType("jsonb");
 
                     b.Property<DateTimeOffset?>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
@@ -260,7 +260,7 @@ namespace YG.Modules.Workflow.Persistence.Migrations
                     b.Property<DefinitionDocument>("Document")
                         .IsRequired()
                         .HasColumnType("jsonb")
-                        .HasComment("The definition graph: {startStepId, steps: [{id, kind: Human|Automatic, role?, formRef?, activity?: {ref, input}, onFailure?: {maxRetries, onExhausted: Pend|Continue}}], transitions: [{from, to, condition?: {field, op, value}}]}");
+                        .HasComment("The definition graph: steps, transitions, activities, form references.");
 
                     b.Property<string>("Key")
                         .IsRequired()
