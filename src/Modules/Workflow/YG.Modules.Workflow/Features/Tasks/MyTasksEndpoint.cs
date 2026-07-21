@@ -25,7 +25,10 @@ public sealed class MyTasksEndpoint(WorkflowDbContext db, IUserContext user)
         var myRoles = user.Roles.ToList();
 
         var tasks = await db.Tasks
-            .Where(t => (t.Status == WorkflowTaskStatus.Open && myRoles.Contains(t.Role))
+            .Where(t => (t.Status == WorkflowTaskStatus.Open &&
+                            (t.AssignedToSub == null
+                                ? myRoles.Contains(t.Role)      // role addressing (as before)
+                                : t.AssignedToSub == user.Sub)) // person addressing wins
                      || (t.Status == WorkflowTaskStatus.Claimed && t.ClaimedBy == user.Sub))
             .OrderBy(t => t.CreatedAt)
             .Select(t => new TaskView(t.Id, t.InstanceId, t.DefinitionKey, t.StepId,

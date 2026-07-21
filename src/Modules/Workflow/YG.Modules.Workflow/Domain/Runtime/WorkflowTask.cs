@@ -14,6 +14,13 @@ public sealed class WorkflowTask
     public string DefinitionKey { get; set; } = default!;
     public string StepId { get; set; } = default!;
     public string Role { get; set; } = default!;            // opaque string; slice 4 deepens this
+
+    /// <summary>
+    /// Runtime pin to one specific user (Keycloak sub). Null = any holder of Role
+    /// may claim. Set by reassignment/consultation — never by definitions, which
+    /// only know roles. When set, it overrides Role for claiming.
+    /// </summary>
+    public string? AssignedToSub { get; set; }
     public string? FormRef { get; set; }                    // what the UI renders
 
     public WorkflowTaskStatus Status { get; set; } = WorkflowTaskStatus.Open;

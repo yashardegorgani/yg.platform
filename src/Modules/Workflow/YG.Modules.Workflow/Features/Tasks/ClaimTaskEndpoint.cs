@@ -26,9 +26,15 @@ public sealed class ClaimTaskEndpoint(WorkflowDbContext db, IUserContext user)
             return;
         }
 
-        if (!user.HasRole(task.Role))
+        // Person-pin overrides role: a task referred to YOU is yours even if the
+        // step's role isn't in your token. Unpinned tasks keep the role rule.
+        var mayClaim = task.AssignedToSub is null
+            ? user.HasRole(task.Role)
+            : task.AssignedToSub == user.Sub;
+
+        if (!mayClaim)
         {
-            await Send.ForbiddenAsync(ct);   // right permission, wrong role -> not your work
+            await Send.ForbiddenAsync(ct);   // right permission, wrong addressee -> not your work
             return;
         }
 
