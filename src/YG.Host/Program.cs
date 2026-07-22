@@ -52,7 +52,7 @@ builder.Services
     {
         options.Authority = builder.Configuration["Auth:Authority"];
         options.RequireHttpsMetadata = false;          // dev only: Keycloak is on http
-        options.TokenValidationParameters.ValidateAudience = false; // revisit in step 7
+        options.TokenValidationParameters.ValidateAudience = false; // dev only: audience validation off
         options.MapInboundClaims = false;
     });
 

@@ -8,6 +8,11 @@ using static YG.Modules.Workflow.Engine.IWorkOrder;
 
 namespace YG.Modules.Workflow.Features.Instances;
 
+/// <summary>
+/// The bubble-up: a child instance finished, so the parent step that spawned it
+/// completes, the child's entire context merges home under the step's resultKey,
+/// and the parent advances through the same engine as everyone else.
+/// </summary>
 public static class ChildInstanceCompletedHandler
 {
     public static async Task Handle(ChildInstanceCompleted message, WorkflowDbContext db,
@@ -17,8 +22,9 @@ public static class ChildInstanceCompletedHandler
             .Include(s => s.Instance)
             .FirstOrDefaultAsync(s => s.Id == message.ParentStepInstanceId, ct);
 
+        // Replays and stale messages get a shrug, not an exception: idempotence first.
         if (parentStep is null || parentStep.Status != StepInstanceStatus.Active)
-            return;   // replay shrug
+            return;
 
         var parent = parentStep.Instance!;
         var child = await db.Instances.FirstAsync(i => i.Id == message.ChildInstanceId, ct);
@@ -47,10 +53,11 @@ public static class ChildInstanceCompletedHandler
             Data = JsonSerializer.SerializeToElement(new { childInstanceId = child.Id }),
         });
 
-        var (_, workOrders) = await WorkflowEngine.AdvanceAsync(db, parent, definition, parentStep, newContext, now, ct);
+        var (_, workOrders) = await WorkflowEngine.AdvanceAsync(
+            db, parent, definition, parentStep, newContext, now, ct);
         foreach (var order in workOrders)
             await bus.PublishAsync(order);
 
-        await db.SaveChangesAsync(ct);
+        await db.SaveChangesAsync(ct);   // handler = Wolverine turf: completion + merge + publish commit together
     }
 }

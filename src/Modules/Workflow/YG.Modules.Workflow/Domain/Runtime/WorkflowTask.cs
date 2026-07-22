@@ -1,4 +1,4 @@
-﻿namespace YG.Modules.Workflow.Domain.Runtime;
+namespace YG.Modules.Workflow.Domain.Runtime;
 
 public enum WorkflowTaskStatus { Open, Claimed, Completed }
 
@@ -13,7 +13,7 @@ public sealed class WorkflowTask
     // Denormalized so the inbox renders without loading definitions:
     public string DefinitionKey { get; set; } = default!;
     public string StepId { get; set; } = default!;
-    public string Role { get; set; } = default!;            // opaque string; slice 4 deepens this
+    public string Role { get; set; } = default!;            // opaque role string, resolved via Access
 
     /// <summary>
     /// Runtime pin to one specific user (Keycloak sub). Null = any holder of Role

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using YG.BuildingBlocks.Messaging;
 using YG.Modules.Workflow.Domain;
@@ -26,6 +26,37 @@ public static class StartChildInstanceHandler
             return;
 
         var parent = parentStep.Instance!;
+
+        // The fork-bomb stopper: recursion is legal, UNBOUNDED recursion is an outage.
+        // Depth is derived by walking the parent chain — no new column, no counter to corrupt.
+        const int MaxDepth = 5;
+        var depth = 1;   // the child about to be spawned
+        var ancestorId = parent.ParentInstanceId;
+        while (ancestorId is not null && depth <= MaxDepth)
+        {
+            depth++;
+            ancestorId = await db.Instances
+                .Where(i => i.Id == ancestorId)
+                .Select(i => i.ParentInstanceId)
+                .FirstOrDefaultAsync(ct);
+        }
+
+        if (depth > MaxDepth)
+        {
+            parentStep.Status = StepInstanceStatus.Pended;
+            db.History.Add(new WorkflowHistoryEntry
+            {
+                InstanceId = parent.Id,
+                StepId = parentStep.StepId,
+                Action = "child-failed",
+                Data = JsonSerializer.SerializeToElement(new
+                {
+                    error = $"Max workflow nesting depth ({MaxDepth}) exceeded — recursive definition?",
+                }),
+            });
+            await db.SaveChangesAsync(ct);
+            return;
+        }
 
         // Children resolve LATEST published — the same rule as humans starting instances.
         var definition = await db.Definitions

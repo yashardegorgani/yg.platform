@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace YG.Modules.Workflow.Domain.Definition;
 
-/// <summary>field/op/value over recorded instance state. Evaluator arrives in slice 3.</summary>
+/// <summary>field/op/value over recorded instance state.</summary>
 public sealed class ConditionDefinition
 {
     public string Field { get; set; } = default!;   // path into instance context, e.g. "approve.decision"

@@ -16,7 +16,7 @@ public static class ModuleLoader
             foreach (var dll in Directory.EnumerateFiles(
                 path, "YG.Modules.*.dll", SearchOption.AllDirectories))
             {
-                // Contracts assemblies are message definitions, not modules (step 6).
+                // Contracts assemblies are message definitions, not modules.
                 if (Path.GetFileName(dll).EndsWith(".Contracts.dll", StringComparison.OrdinalIgnoreCase))
                     continue;
 

@@ -1,4 +1,4 @@
-﻿namespace YG.Modules.Workflow.Domain.Definition;
+namespace YG.Modules.Workflow.Domain.Definition;
 
 public static class DefinitionGraphValidator
 {
@@ -45,7 +45,7 @@ public static class DefinitionGraphValidator
                 errors.Add($"Transition references unknown step '{t.To}'.");
         }
 
-        // --- Routing rules (slice 3) ---
+        // --- Routing rules ---
 
         // Conditions must be well-formed. The runtime treats nonsense as "false";
         // publish treats nonsense as a design error. Both are correct.
@@ -80,7 +80,7 @@ public static class DefinitionGraphValidator
                 errors.Add($"Step '{group.Key}': conditional branching needs an unconditional fallback transition.");
         }
 
-        // --- Parallel routing sanity (slice 10) ---
+        // --- Parallel routing sanity ---
 
         foreach (var step in doc.Steps.Where(s => s.Branching == BranchingMode.Parallel))
         {

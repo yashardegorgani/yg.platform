@@ -1,4 +1,4 @@
-﻿using FastEndpoints;
+using FastEndpoints;
 using Microsoft.EntityFrameworkCore;
 using YG.BuildingBlocks.Auth;
 using YG.Modules.Workflow.Domain.Runtime;
@@ -20,7 +20,7 @@ public sealed class MyTasksEndpoint(WorkflowDbContext db, IUserContext user)
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        // Slice-2 assignment: the role claims already in the token
+        // The role claims already in the token
         // (courtesy of RoleClaimsTransformer) ARE the assignment mechanism.
         var myRoles = user.Roles.ToList();
 

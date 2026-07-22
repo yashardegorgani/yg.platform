@@ -37,7 +37,8 @@ public sealed class WorkflowDbContext(DbContextOptions<WorkflowDbContext> option
             // Typed DefinitionDocument POCO -> one jsonb column.
             // Works because AddModuleDbContext enables dynamic JSON (same as Catalog's ProductAttributes).
             b.Property(d => d.Document).HasColumnType("jsonb")
-                .HasComment("The definition graph: {startStepId, steps: [{id, kind: Human|Automatic, role?, formRef?, branching: Exclusive|Parallel, join: None|All, activity?: {ref, input}, onFailure?: {maxRetries, onExhausted: Pend|Continue}}], transitions: [{from, to, condition?: {field, op, value}}]}");
+                .HasComment("The definition graph: {startStepId, steps: [{id, kind: Human|Automatic|SubWorkflow, role?, formRef?, branching: Exclusive|Parallel, join: None|All, activity?: {type, settings?, resultKey?}, subWorkflow?: {key, resultKey?}, onFailure?: {maxRetries, onExhausted: Pend|Continue}}], transitions: [{from, to, condition?: {field, op, value}}]}");
+
 
             b.Property(d => d.CreatedBy).HasMaxLength(100);
             b.Property(d => d.PublishedBy).HasMaxLength(100);
@@ -110,7 +111,7 @@ public sealed class WorkflowDbContext(DbContextOptions<WorkflowDbContext> option
             b.HasKey(h => h.Id);
             b.Property(h => h.StepId).HasMaxLength(100);
             b.Property(h => h.Action).HasMaxLength(50)
-                .HasComment("instance-started | task-created | task-claimed | task-completed | task-reassigned | note-added | activity-scheduled | activity-failed | activity-pended | activity-continued | activity-resumed | branch-completed | join-waiting | instance-completed");
+                .HasComment("instance-started | task-created | task-claimed | task-completed | task-reassigned | note-added | activity-scheduled | activity-failed | activity-pended | activity-continued | activity-completed | activity-resumed | branch-completed | join-waiting | child-scheduled | child-started | child-failed | child-completed | instance-completed");
             b.Property(h => h.Actor).HasMaxLength(100);
             b.Property(h => h.Data).HasColumnType("jsonb")
                 .HasComment("Action payload, shape per action: task-reassigned {toSub?, toRole?} | task-completed {data} | activity-failed/pended {error, attempts} | note-added {text}.");
