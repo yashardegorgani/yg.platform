@@ -125,9 +125,9 @@ public static class ExecuteActivityStepHandler
             });
         }
 
-        var (_, workOrder) = WorkflowEngine.Advance(db, instance, definition, step.Id, newContext, now);
-        if (workOrder is not null)
-            await bus.PublishAsync(workOrder);   // automatic → automatic chains ride the same rail
+        var (_, workOrders) = await WorkflowEngine.AdvanceAsync(db, instance, definition, stepInstance, newContext, now, ct);
+        foreach (var order in workOrders)
+            await bus.PublishAsync(order);   // automatic → automatic chains ride the same rail
 
         await db.SaveChangesAsync(ct);   // handler = Wolverine turf: auto-transactions commit save + publish together
     }

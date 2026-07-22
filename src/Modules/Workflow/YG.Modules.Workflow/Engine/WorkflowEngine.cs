@@ -3,6 +3,7 @@ using YG.Modules.Workflow.Domain;
 using YG.Modules.Workflow.Domain.Definition;
 using YG.Modules.Workflow.Domain.Runtime;
 using YG.Modules.Workflow.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 namespace YG.Modules.Workflow.Engine;
 
@@ -28,9 +29,9 @@ internal static class WorkflowEngine
         foreach (var s in doc.Steps.Where(s => s.Kind == StepKind.Human && string.IsNullOrWhiteSpace(s.Role)))
             errors.Add($"Step '{s.Id}': human steps need a role for task assignment.");
 
-        // Slice 10 in progress: the model speaks parallel, the engine doesn't yet.
-        if (doc.Steps.Any(s => s.Branching == BranchingMode.Parallel || s.Join == JoinMode.All))
-            errors.Add("This engine build cannot execute parallel branches yet.");
+        // Slice 10 in progress: fan-out runs; join arrives next.
+        if (doc.Steps.Any(s => s.Join == JoinMode.All))
+            errors.Add("This engine build cannot execute join steps yet.");
 
         return errors;
     }
@@ -87,17 +88,44 @@ internal static class WorkflowEngine
     }
 
     /// <summary>
-    /// The one advancement rule: pick the next step and activate it, or finish
-    /// the instance. Returns what the caller must handle: the next step (for
-    /// responses) and a work order to publish, when the next step is automatic.
+    /// The one advancement rule: activate every next step (one for exclusive
+    /// branching, several for parallel), or settle what a dead end means. With
+    /// parallelism, "no outgoing transition" only ends the BRANCH — the instance
+    /// completes when no other step instance is still active or pended.
     /// </summary>
-    public static (StepDefinition? Next, ExecuteActivityStep? WorkOrder) Advance(
+    public static async Task<(List<StepDefinition> Next, List<ExecuteActivityStep> WorkOrders)> AdvanceAsync(
         WorkflowDbContext db, WorkflowInstance instance, WorkflowDefinition definition,
-        string fromStepId, Dictionary<string, JsonElement> context, DateTimeOffset now)
+        WorkflowStepInstance completedStep, Dictionary<string, JsonElement> context,
+        DateTimeOffset now, CancellationToken ct)
     {
-        var next = NextStep(definition.Document, fromStepId, context);
-        if (next is not null)
-            return (next, ActivateStep(db, instance, definition.Key, next));
+        var nextSteps = NextSteps(definition.Document, completedStep.StepId, context);
+        var workOrders = new List<ExecuteActivityStep>();
+
+        foreach (var next in nextSteps)
+            if (ActivateStep(db, instance, definition.Key, next) is { } order)
+                workOrders.Add(order);
+
+        if (nextSteps.Count > 0)
+            return (nextSteps, workOrders);
+
+        // Dead end for THIS branch. Any sibling still working? Then the instance lives on.
+        // completedStep is excluded by id — its Completed status is tracked but unsaved,
+        // so the database would still report it as Active.
+        var siblingWork = await db.StepInstances.AnyAsync(s =>
+            s.InstanceId == instance.Id
+            && s.Id != completedStep.Id
+            && (s.Status == StepInstanceStatus.Active || s.Status == StepInstanceStatus.Pended), ct);
+
+        if (siblingWork)
+        {
+            db.History.Add(new WorkflowHistoryEntry
+            {
+                InstanceId = instance.Id,
+                StepId = completedStep.StepId,
+                Action = "branch-completed",
+            });
+            return ([], workOrders);
+        }
 
         instance.Status = WorkflowInstanceStatus.Completed;
         instance.CompletedAt = now;
@@ -106,24 +134,26 @@ internal static class WorkflowEngine
             InstanceId = instance.Id,
             Action = "instance-completed",
         });
-        return (null, null);
+        return ([], workOrders);
     }
 
     /// <summary>
-    /// Transition selection: outgoing transitions are evaluated in DOCUMENT ORDER;
-    /// the first satisfied one wins. An unconditional transition always matches —
-    /// place it last as the "else" branch. Null means no outgoing transitions:
-    /// the instance is done. ("No match" can't happen for published definitions —
-    /// the validator requires an unconditional fallback wherever conditions branch.)
+    /// Transition selection, now two-mode. Exclusive (default): document order,
+    /// first satisfied wins, unconditional = else. Parallel: ALL transitions fire —
+    /// the validator already guaranteed they are unconditional.
     /// </summary>
-    public static StepDefinition? NextStep(DefinitionDocument doc, string fromStepId,
+    public static List<StepDefinition> NextSteps(DefinitionDocument doc, string fromStepId,
         Dictionary<string, JsonElement> context)
     {
-        var transition = doc.Transitions
-            .Where(t => t.From == fromStepId)
-            .FirstOrDefault(t => t.Condition is null
-                              || ConditionEvaluator.Evaluate(t.Condition, context));
+        var from = doc.Steps.First(s => s.Id == fromStepId);
+        var outgoing = doc.Transitions.Where(t => t.From == fromStepId).ToList();
 
-        return transition is null ? null : doc.Steps.First(s => s.Id == transition.To);
+        if (from.Branching == BranchingMode.Parallel)
+            return outgoing.Select(t => doc.Steps.First(s => s.Id == t.To)).ToList();
+
+        var match = outgoing.FirstOrDefault(t => t.Condition is null
+                                              || ConditionEvaluator.Evaluate(t.Condition, context));
+
+        return match is null ? [] : [doc.Steps.First(s => s.Id == match.To)];
     }
 }

@@ -88,16 +88,16 @@ public sealed class CompleteTaskEndpoint(WorkflowDbContext db, IUserContext user
             Data = JsonSerializer.SerializeToElement(data),
         });
 
-        // 5. Advance: next step's task, or the finish line.
-        // 5. Advance: next human task, next automatic work order, or the finish line.
-        var (next, workOrder) = WorkflowEngine.Advance(db, instance, definition, task.StepId, newContext, now);
+        // 5. Advance: next human tasks, next automatic work orders, or the finish line.
+        var (next, workOrders) = await WorkflowEngine.AdvanceAsync(db, instance, definition, stepInstance, newContext, now, ct);
 
         outbox.Enroll(db);
-        if (workOrder is not null)
-            await outbox.PublishAsync(workOrder);
+        foreach (var order in workOrders)
+            await outbox.PublishAsync(order);
 
         await outbox.SaveChangesAndPublishAsync(ct);   // evidence + closure + advance: one atomic unit
 
-        await Send.OkAsync(new(instance.Status.ToString(), next?.Id), ct);
+        await Send.OkAsync(new(instance.Status.ToString(),
+            next.Count == 0 ? null : string.Join(", ", next.Select(n => n.Id))), ct);
     }
 }
