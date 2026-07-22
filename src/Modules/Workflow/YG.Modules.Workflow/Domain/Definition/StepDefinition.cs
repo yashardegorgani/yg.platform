@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 namespace YG.Modules.Workflow.Domain.Definition;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum StepKind { Human, Automatic }
+public enum StepKind { Human, Automatic, SubWorkflow }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum BranchingMode { Exclusive, Parallel }
@@ -28,4 +28,6 @@ public sealed class StepDefinition
     // Automatic steps (behavior arrives in slice 6; the shape exists now):
     public ActivityDefinition? Activity { get; set; }
     public FailurePolicy? OnFailure { get; set; }
+    // Sub-workflow steps (slice 10, parent-child):
+    public SubWorkflowDefinition? SubWorkflow { get; set; }
 }

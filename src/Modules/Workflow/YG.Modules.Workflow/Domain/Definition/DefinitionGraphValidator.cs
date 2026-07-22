@@ -14,13 +14,18 @@ public static class DefinitionGraphValidator
         {
             if (string.IsNullOrWhiteSpace(step.Id))
                 errors.Add("Every step needs an id.");
+
             else if (!stepIds.Add(step.Id))
                 errors.Add($"Duplicate step id '{step.Id}'.");
 
             if (step.Kind == StepKind.Human && string.IsNullOrWhiteSpace(step.FormRef))
                 errors.Add($"Human step '{step.Id}' needs a formRef.");
+
             if (step.Kind == StepKind.Automatic && step.Activity is null)
                 errors.Add($"Automatic step '{step.Id}' needs an activity.");
+
+            if (step.Kind == StepKind.SubWorkflow && string.IsNullOrWhiteSpace(step.SubWorkflow?.Key))
+                errors.Add($"Sub-workflow step '{step.Id}' needs a subWorkflow.key.");
         }
 
         if (doc.Steps.Count == 0)

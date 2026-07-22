@@ -16,8 +16,9 @@ public sealed class WorkflowInstance
     /// <summary>Opaque reference to a business entity. Never a FK, never resolved by the engine.</summary>
     public string? BusinessKey { get; set; }
 
-    /// <summary>Anticipates slice 8 (parent/child hierarchy). Unused until then.</summary>
+    /// <summary>Set when this instance was spawned by a SubWorkflow step. Both null = top-level instance.</summary>
     public Guid? ParentInstanceId { get; set; }
+    public Guid? ParentStepInstanceId { get; set; }
 
     /// <summary>The accumulated state. Steps write it; transitions will only ever read it.</summary>
     public Dictionary<string, JsonElement> Context { get; set; } = new();

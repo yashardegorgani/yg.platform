@@ -29,9 +29,9 @@ internal static class WorkflowEngine
         foreach (var s in doc.Steps.Where(s => s.Kind == StepKind.Human && string.IsNullOrWhiteSpace(s.Role)))
             errors.Add($"Step '{s.Id}': human steps need a role for task assignment.");
 
-        // Slice 10 in progress: fan-out runs; join arrives next.
-        if (doc.Steps.Any(s => s.Join == JoinMode.All))
-            errors.Add("This engine build cannot execute join steps yet.");
+        // Slice 10 in progress: the model speaks sub-workflows, the engine doesn't yet.
+        if (doc.Steps.Any(s => s.Kind == StepKind.SubWorkflow))
+            errors.Add("This engine build cannot execute sub-workflow steps yet.");
 
         return errors;
     }
@@ -89,28 +89,49 @@ internal static class WorkflowEngine
 
     /// <summary>
     /// The one advancement rule: activate every next step (one for exclusive
-    /// branching, several for parallel), or settle what a dead end means. With
-    /// parallelism, "no outgoing transition" only ends the BRANCH — the instance
-    /// completes when no other step instance is still active or pended.
+    /// branching, several for parallel) — except joins that are still waiting for
+    /// other branches. A dead end only ends the BRANCH; the instance completes
+    /// when no other step instance is still active or pended.
     /// </summary>
     public static async Task<(List<StepDefinition> Next, List<ExecuteActivityStep> WorkOrders)> AdvanceAsync(
         WorkflowDbContext db, WorkflowInstance instance, WorkflowDefinition definition,
         WorkflowStepInstance completedStep, Dictionary<string, JsonElement> context,
         DateTimeOffset now, CancellationToken ct)
     {
-        var nextSteps = NextSteps(definition.Document, completedStep.StepId, context);
+        var candidates = NextSteps(definition.Document, completedStep.StepId, context);
+        var activated = new List<StepDefinition>();
         var workOrders = new List<ExecuteActivityStep>();
 
-        foreach (var next in nextSteps)
+        foreach (var next in candidates)
+        {
+            if (next.Join == JoinMode.All
+                && !await JoinSatisfiedAsync(db, instance, definition.Document, next, completedStep, ct))
+            {
+                db.History.Add(new WorkflowHistoryEntry
+                {
+                    InstanceId = instance.Id,
+                    StepId = next.Id,
+                    Action = "join-waiting",
+                    Data = JsonSerializer.SerializeToElement(new { arrivedFrom = completedStep.StepId }),
+                });
+                continue;
+            }
+
             if (ActivateStep(db, instance, definition.Key, next) is { } order)
                 workOrders.Add(order);
+            activated.Add(next);
+        }
 
-        if (nextSteps.Count > 0)
-            return (nextSteps, workOrders);
+        if (activated.Count > 0)
+            return (activated, workOrders);
 
-        // Dead end for THIS branch. Any sibling still working? Then the instance lives on.
-        // completedStep is excluded by id — its Completed status is tracked but unsaved,
-        // so the database would still report it as Active.
+        // Nothing activated. If a join is merely waiting, the branch pauses here —
+        // the incomplete predecessor that made it wait IS the sibling work that
+        // keeps the instance alive.
+        if (candidates.Count > 0)
+            return ([], workOrders);
+
+        // True dead end for THIS branch. Any sibling still working? Then the instance lives on.
         var siblingWork = await db.StepInstances.AnyAsync(s =>
             s.InstanceId == instance.Id
             && s.Id != completedStep.Id
@@ -135,6 +156,30 @@ internal static class WorkflowEngine
             Action = "instance-completed",
         });
         return ([], workOrders);
+    }
+
+    /// <summary>
+    /// A join is satisfied when every predecessor step (every transition pointing
+    /// at it) has a Completed step instance. The arrival that triggered this check
+    /// counts as done — its Completed status is tracked but not yet saved.
+    /// </summary>
+    private static async Task<bool> JoinSatisfiedAsync(WorkflowDbContext db, WorkflowInstance instance,
+        DefinitionDocument doc, StepDefinition join, WorkflowStepInstance completedStep, CancellationToken ct)
+    {
+        var predecessors = doc.Transitions.Where(t => t.To == join.Id).Select(t => t.From).ToHashSet();
+        predecessors.Remove(completedStep.StepId);
+
+        if (predecessors.Count == 0) return true;
+
+        var completedCount = await db.StepInstances
+            .Where(s => s.InstanceId == instance.Id
+                && predecessors.Contains(s.StepId)
+                && s.Status == StepInstanceStatus.Completed)
+            .Select(s => s.StepId)
+            .Distinct()
+            .CountAsync(ct);
+
+        return completedCount == predecessors.Count;
     }
 
     /// <summary>

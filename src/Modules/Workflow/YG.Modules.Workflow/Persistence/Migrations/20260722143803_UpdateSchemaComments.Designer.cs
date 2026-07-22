@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using YG.Modules.Workflow.Domain.Definition;
@@ -14,9 +15,11 @@ using YG.Modules.Workflow.Persistence;
 namespace YG.Modules.Workflow.Persistence.Migrations
 {
     [DbContext(typeof(WorkflowDbContext))]
-    partial class WorkflowDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722143803_UpdateSchemaComments")]
+    partial class UpdateSchemaComments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,12 +101,7 @@ namespace YG.Modules.Workflow.Persistence.Migrations
                         .HasColumnType("integer");
 
                     b.Property<Guid?>("ParentInstanceId")
-                        .HasColumnType("uuid")
-                        .HasComment("Spawning instance, when this is a child. Null = top-level.");
-
-                    b.Property<Guid?>("ParentStepInstanceId")
-                        .HasColumnType("uuid")
-                        .HasComment("The parent's SubWorkflow step instance awaiting this child's completion.");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("StartedAt")
                         .HasColumnType("timestamp with time zone");
@@ -122,8 +120,6 @@ namespace YG.Modules.Workflow.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BusinessKey");
-
-                    b.HasIndex("ParentInstanceId");
 
                     b.HasIndex("Status");
 
