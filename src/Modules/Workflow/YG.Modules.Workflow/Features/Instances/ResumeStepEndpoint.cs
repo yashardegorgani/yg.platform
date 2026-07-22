@@ -6,6 +6,7 @@ using YG.Modules.Workflow.Domain.Definition;
 using YG.Modules.Workflow.Domain.Runtime;
 using YG.Modules.Workflow.Engine;
 using YG.Modules.Workflow.Persistence;
+using static YG.Modules.Workflow.Engine.IWorkOrder;
 
 namespace YG.Modules.Workflow.Features.Instances;
 
@@ -78,7 +79,10 @@ public sealed class ResumeStepEndpoint(WorkflowDbContext db, IUserContext user, 
 
         // Endpoint turf -> outbox rails: the wake-up and the work order commit together.
         outbox.Enroll(db);
-        await outbox.PublishAsync(new ExecuteActivityStep(instance.Id, stepInstance.Id));
+        IWorkOrder order = step.Kind == StepKind.SubWorkflow
+            ? new StartChildInstance(instance.Id, stepInstance.Id, step.SubWorkflow!.Key)
+            : new ExecuteActivityStep(instance.Id, stepInstance.Id);
+        await outbox.PublishAsync(order);
         await outbox.SaveChangesAndPublishAsync(ct);
 
         await Send.NoContentAsync(ct);
