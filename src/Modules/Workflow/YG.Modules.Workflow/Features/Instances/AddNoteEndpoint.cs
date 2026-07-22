@@ -15,7 +15,7 @@ public sealed class AddNoteEndpoint(WorkflowDbContext db, IUserContext user)
     public override void Configure()
     {
         Post("/workflow/instances/{id}/notes");
-        Permissions("workflow.instances.read");   // may see it -> may annotate it
+        Permissions("workflow.instances.read", "workflow.tasks.work");   // any-of, FastEndpoints semantics
     }
 
     public override async Task HandleAsync(AddNoteRequest req, CancellationToken ct)

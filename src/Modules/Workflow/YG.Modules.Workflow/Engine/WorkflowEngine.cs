@@ -28,6 +28,10 @@ internal static class WorkflowEngine
         foreach (var s in doc.Steps.Where(s => s.Kind == StepKind.Human && string.IsNullOrWhiteSpace(s.Role)))
             errors.Add($"Step '{s.Id}': human steps need a role for task assignment.");
 
+        // Slice 10 in progress: the model speaks parallel, the engine doesn't yet.
+        if (doc.Steps.Any(s => s.Branching == BranchingMode.Parallel || s.Join == JoinMode.All))
+            errors.Add("This engine build cannot execute parallel branches yet.");
+
         return errors;
     }
 

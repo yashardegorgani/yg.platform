@@ -56,8 +56,13 @@ public static class DefinitionGraphValidator
         }
 
         // Branching sanity per step: document order is semantics, unconditional = else.
+        // These rules are EXCLUSIVE-mode semantics — parallel steps have their own rules below.
         foreach (var group in doc.Transitions.GroupBy(t => t.From))
         {
+            var fromStep = doc.Steps.FirstOrDefault(s => s.Id == group.Key);
+            if (fromStep is not null && fromStep.Branching == BranchingMode.Parallel)
+                continue;
+
             var outgoing = group.ToList();
             var elseIndex = outgoing.FindIndex(t => t.Condition is null);
 
@@ -68,6 +73,23 @@ public static class DefinitionGraphValidator
             // Mandatory else: conditional branching without a fallback can stall an instance.
             if (elseIndex < 0 && outgoing.Any(t => t.Condition is not null))
                 errors.Add($"Step '{group.Key}': conditional branching needs an unconditional fallback transition.");
+        }
+
+        // --- Parallel routing sanity (slice 10) ---
+
+        foreach (var step in doc.Steps.Where(s => s.Branching == BranchingMode.Parallel))
+        {
+            var outgoing = doc.Transitions.Where(t => t.From == step.Id).ToList();
+            if (outgoing.Count < 2)
+                errors.Add($"Step '{step.Id}': parallel branching needs at least two outgoing transitions.");
+            if (outgoing.Any(t => t.Condition is not null))
+                errors.Add($"Step '{step.Id}': parallel branches must be unconditional — conditions choose one path, parallel takes them all.");
+        }
+
+        foreach (var step in doc.Steps.Where(s => s.Join == JoinMode.All))
+        {
+            if (doc.Transitions.Count(t => t.To == step.Id) < 2)
+                errors.Add($"Step '{step.Id}': join 'All' needs at least two incoming transitions.");
         }
 
         // Reachability: every step must be reachable from the start step.
