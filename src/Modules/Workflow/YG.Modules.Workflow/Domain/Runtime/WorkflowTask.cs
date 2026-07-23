@@ -1,6 +1,6 @@
 namespace YG.Modules.Workflow.Domain.Runtime;
 
-public enum WorkflowTaskStatus { Open, Claimed, Completed }
+public enum WorkflowTaskStatus { Open, Claimed, Completed, Cancelled }
 
 public sealed class WorkflowTask
 {

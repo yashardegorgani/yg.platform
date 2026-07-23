@@ -2,7 +2,8 @@
 
 namespace YG.Modules.Workflow.Domain.Runtime;
 
-public enum WorkflowInstanceStatus { Running, Completed }
+public enum WorkflowInstanceStatus { Running, Completed, Cancelled }
+
 
 public sealed class WorkflowInstance
 {

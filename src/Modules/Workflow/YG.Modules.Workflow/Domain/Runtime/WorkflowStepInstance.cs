@@ -2,7 +2,7 @@
 
 namespace YG.Modules.Workflow.Domain.Runtime;
 
-public enum StepInstanceStatus { Active, Completed, Pended }
+public enum StepInstanceStatus { Active, Completed, Pended, Cancelled }
 
 public sealed class WorkflowStepInstance
 {
