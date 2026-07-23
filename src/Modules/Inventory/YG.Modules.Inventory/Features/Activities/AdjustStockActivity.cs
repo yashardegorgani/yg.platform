@@ -28,7 +28,7 @@ public sealed class AdjustStockActivity(InventoryDbContext db, ILogger<Inventory
 
         var delta = d.GetInt32();
 
-        if (!TryResolvePath(context.InstanceContext, contextKey, out var idElement) ||
+        if (!context.InstanceContext.TryResolvePath(contextKey, out var idElement) ||
             idElement.ValueKind != JsonValueKind.String ||
             !Guid.TryParse(idElement.GetString(), out var productId))
             return ActivityResult.Failure(
@@ -60,26 +60,5 @@ public sealed class AdjustStockActivity(InventoryDbContext db, ILogger<Inventory
 
         return ActivityResult.Success(JsonSerializer.SerializeToElement(
             new { productId, delta, quantity }));
-    }
-
-    /// <summary>
-    /// Context nests each human step's data under the step id, so addresses
-    /// are dotted paths: "fill.productId" = context["fill"].productId.
-    /// </summary>
-    private static bool TryResolvePath(
-        IReadOnlyDictionary<string, JsonElement> ctx, string path, out JsonElement element)
-    {
-        element = default;
-        var segments = path.Split('.');
-        if (!ctx.TryGetValue(segments[0], out element))
-            return false;
-
-        foreach (var segment in segments.Skip(1))
-        {
-            if (element.ValueKind != JsonValueKind.Object ||
-                !element.TryGetProperty(segment, out element))
-                return false;
-        }
-        return true;
     }
 }

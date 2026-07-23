@@ -1,5 +1,5 @@
-﻿using System.Text.Json;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using System.Text.Json;
 using YG.BuildingBlocks.Messaging;
 using YG.Modules.Purchase.Features.PlaceOrder;
 using YG.Modules.Workflow.Contracts;
@@ -26,13 +26,13 @@ public sealed class PlaceOrderActivity(IYGMessageBus bus, ILogger<PurchaseModule
             qtyKeyProp.GetString() is not { } qtyKey)
             return ActivityResult.Failure("Settings must contain 'productIdFrom' and 'quantityFrom'.");
 
-        if (!TryResolvePath(context.InstanceContext, idKey, out var idElement) ||
+        if (!context.InstanceContext.TryResolvePath(idKey, out var idElement) ||
             idElement.ValueKind != JsonValueKind.String ||
             !Guid.TryParse(idElement.GetString(), out var productId))
             return ActivityResult.Failure($"Context key '{idKey}' is missing or not a product GUID.");
 
-        if (!TryResolvePath(context.InstanceContext, qtyKey, out var qtyElement) ||
-            !TryReadInt(qtyElement, out var quantity) || quantity < 1)
+        if (!context.InstanceContext.TryResolvePath(qtyKey, out var qtyElement) ||
+            !qtyElement.TryReadInt(out var quantity) || quantity < 1)
             return ActivityResult.Failure($"Context key '{qtyKey}' is missing or not a positive quantity.");
 
         // The full cross-module dance happens inside the existing handler:
@@ -50,33 +50,5 @@ public sealed class PlaceOrderActivity(IYGMessageBus bus, ILogger<PurchaseModule
 
         return ActivityResult.Success(JsonSerializer.SerializeToElement(
             new { orderId = result.OrderId, productId, quantity }));
-    }
-
-    private static bool TryReadInt(JsonElement element, out int value)
-    {
-        value = 0;
-        return element.ValueKind switch
-        {
-            JsonValueKind.Number => element.TryGetInt32(out value),
-            JsonValueKind.String => int.TryParse(element.GetString(), out value),
-            _ => false,
-        };
-    }
-
-    private static bool TryResolvePath(
-        IReadOnlyDictionary<string, JsonElement> ctx, string path, out JsonElement element)
-    {
-        element = default;
-        var segments = path.Split('.');
-        if (!ctx.TryGetValue(segments[0], out element))
-            return false;
-
-        foreach (var segment in segments.Skip(1))
-        {
-            if (element.ValueKind != JsonValueKind.Object ||
-                !element.TryGetProperty(segment, out element))
-                return false;
-        }
-        return true;
     }
 }
