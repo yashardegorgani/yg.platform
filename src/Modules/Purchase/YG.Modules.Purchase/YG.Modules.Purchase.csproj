@@ -16,5 +16,6 @@
 		<ProjectReference Include="..\..\..\BuildingBlocks\YG.BuildingBlocks.Persistence\YG.BuildingBlocks.Persistence.csproj" />
 		<ProjectReference Include="..\..\Catalog\YG.Modules.Catalog.Contracts\YG.Modules.Catalog.Contracts.csproj" />
 		<ProjectReference Include="..\..\Inventory\YG.Modules.Inventory.Contracts\YG.Modules.Inventory.Contracts.csproj" />
+		<ProjectReference Include="..\..\Workflow\YG.Modules.Workflow.Contracts\YG.Modules.Workflow.Contracts.csproj" />
 	</ItemGroup>
 </Project>
