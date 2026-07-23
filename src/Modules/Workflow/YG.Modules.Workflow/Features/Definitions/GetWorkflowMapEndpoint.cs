@@ -5,7 +5,8 @@ using YG.Modules.Workflow.Persistence;
 
 namespace YG.Modules.Workflow.Features.Definitions;
 
-public sealed record WorkflowMapStep(string Id, string Kind, string? Role, string? FormRef);
+public sealed record WorkflowMapStep(string Id, string Kind, string? Role, string? FormRef,
+    string Branching, string Join);
 
 public sealed record WorkflowMapResponse(string StartStepId, List<WorkflowMapStep> Steps);
 
@@ -34,7 +35,8 @@ public sealed class GetWorkflowMapEndpoint(WorkflowDbContext db)
         }
 
         var steps = def.Document.Steps
-            .Select(s => new WorkflowMapStep(s.Id, s.Kind.ToString(), s.Role, s.FormRef))
+            .Select(s => new WorkflowMapStep(s.Id, s.Kind.ToString(), s.Role, s.FormRef,
+                s.Branching.ToString(), s.Join.ToString()))
             .ToList();
 
         await Send.OkAsync(new WorkflowMapResponse(def.Document.StartStepId!, steps), ct);

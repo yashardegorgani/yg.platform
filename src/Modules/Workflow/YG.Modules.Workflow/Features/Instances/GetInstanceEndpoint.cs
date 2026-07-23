@@ -14,7 +14,8 @@ public sealed record HistoryView(string Action, string? StepId, string? Actor,
     JsonElement? ActorSnapshot, JsonElement? Data, DateTimeOffset OccurredAt);
 
 public sealed record InstanceDetail(Guid Id, string DefinitionKey, int DefinitionVersion,
-    string Status, string? BusinessKey, Dictionary<string, JsonElement> Context,
+    string Status, string? BusinessKey, Guid? ParentInstanceId,
+    Dictionary<string, JsonElement> Context,
     DateTimeOffset StartedAt, DateTimeOffset? CompletedAt,
     List<StepInstanceView> Steps, List<HistoryView> History);
 
@@ -50,7 +51,7 @@ public sealed class GetInstanceEndpoint(WorkflowDbContext db)
             .ToListAsync(ct);
 
         await Send.OkAsync(new(instance.Id, instance.DefinitionKey, instance.DefinitionVersion,
-            instance.Status.ToString(), instance.BusinessKey, instance.Context,
-            instance.StartedAt, instance.CompletedAt, steps, history), ct);
+             instance.Status.ToString(), instance.BusinessKey, instance.ParentInstanceId,
+             instance.Context, instance.StartedAt, instance.CompletedAt, steps, history), ct);
     }
 }
