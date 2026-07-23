@@ -11,4 +11,5 @@ public sealed record ActivityContext(
     Guid InstanceId,
     string StepId,
     JsonElement? Settings,
-    IReadOnlyDictionary<string, JsonElement> InstanceContext);
+    IReadOnlyDictionary<string, JsonElement> InstanceContext,
+    string StartedBy);

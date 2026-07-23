@@ -43,7 +43,7 @@ public static class ExecuteActivityStepHandler
         try
         {
             result = await activity.ExecuteAsync(new ActivityContext(
-                instance.Id, step.Id, step.Activity.Settings, instance.Context), ct);
+                instance.Id, step.Id, step.Activity.Settings, instance.Context, instance.StartedBy), ct);
         }
         catch (Exception ex)
         {
