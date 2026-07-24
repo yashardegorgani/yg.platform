@@ -2,6 +2,7 @@ using FastEndpoints;
 using JasperFx;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Scrutor;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 using Wolverine.ErrorHandling;
@@ -10,6 +11,7 @@ using YG.BuildingBlocks.Auth;
 using YG.BuildingBlocks.Messaging;
 using YG.BuildingBlocks.Modules;
 using YG.Host.Infrastructure;
+using YG.Modules.Workflow.Contracts;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,12 @@ var modules = ModuleLoader.LoadModules(
 
 foreach (var module in modules)
     module.ConfigureServices(builder.Services, builder.Configuration);
+
+builder.Services.Scan(scan => scan
+    .FromAssemblies(modules.Select(m => m.GetType().Assembly).Distinct())
+    .AddClasses(c => c.AssignableTo<IWorkflowActivity>())
+    .As<IWorkflowActivity>()
+    .WithScopedLifetime());
 
 builder.Host.UseWolverine(opts =>
 {

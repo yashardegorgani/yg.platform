@@ -16,8 +16,6 @@ public sealed class InventoryModule : IYGModule
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddModuleDbContext<InventoryDbContext>(configuration);
-        services.AddScoped<IWorkflowActivity, AdjustStockActivity>();
-        services.AddScoped<IWorkflowActivity, CheckStockActivity>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints) { }

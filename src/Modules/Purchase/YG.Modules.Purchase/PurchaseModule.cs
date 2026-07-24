@@ -16,7 +16,6 @@ public sealed class PurchaseModule : IYGModule
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddModuleDbContext<PurchaseDbContext>(configuration);
-        services.AddScoped<IWorkflowActivity, PlaceOrderActivity>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints) { }

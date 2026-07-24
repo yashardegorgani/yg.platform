@@ -16,7 +16,6 @@ public sealed class CatalogModule : IYGModule
     public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
         services.AddModuleDbContext<CatalogDbContext>(configuration);
-        services.AddScoped<IWorkflowActivity, SnapshotProductActivity>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder endpoints)

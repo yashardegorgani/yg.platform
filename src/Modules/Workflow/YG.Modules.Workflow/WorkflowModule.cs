@@ -18,7 +18,6 @@ public sealed class WorkflowModule : IYGModule
     {
         services.AddModuleDbContext<WorkflowDbContext>(configuration);
         services.AddScoped<ActivityRegistry>();
-        services.AddScoped<IWorkflowActivity, CoreLogActivity>();
     }
 
     public void MapEndpoints(IEndpointRouteBuilder app)

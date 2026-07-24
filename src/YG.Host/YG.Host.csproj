@@ -3,6 +3,7 @@
 	<ItemGroup>
 		<PackageReference Include="FastEndpoints" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+		<PackageReference Include="Scrutor" />
 		<PackageReference Include="WolverineFx" />
 		<PackageReference Include="WolverineFx.EntityFrameworkCore" />
 		<PackageReference Include="WolverineFx.Postgresql" />
@@ -13,6 +14,7 @@
 		<ProjectReference Include="..\BuildingBlocks\YG.BuildingBlocks.Auth\YG.BuildingBlocks.Auth.csproj" />
 		<ProjectReference Include="..\BuildingBlocks\YG.BuildingBlocks.Messaging\YG.BuildingBlocks.Messaging.csproj" />
 		<ProjectReference Include="..\BuildingBlocks\YG.BuildingBlocks.Modules\YG.BuildingBlocks.Modules.csproj" />
+		<ProjectReference Include="..\Modules\Workflow\YG.Modules.Workflow.Contracts\YG.Modules.Workflow.Contracts.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
